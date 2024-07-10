@@ -31,7 +31,7 @@ fun AppNavHost(
     shukuClient: ShukuClient,
     modifier: Modifier = Modifier
 ) {
-    val series by seriesDao.getAllSeriesWithChapters().collectAsState(initial = emptyList())
+    val seriesList by seriesDao.getAllSeriesWithChapters().collectAsState(initial = emptyList())
     val scope = rememberCoroutineScope()
     NavHost(
         navController = navController,
@@ -44,19 +44,14 @@ fun AppNavHost(
     ) {
         composable(route = Library.route) {
             LibraryScreen(
-                seriesList = series,
+                seriesList = seriesList,
                 onSeriesClick = { seriesId -> navController.navigateToSeriesScreen(seriesId) }
             )
         }
         composable(route = Browse.route) {
             BrowseScreen(
+                seriesDao = seriesDao,
                 shukuClient = shukuClient,
-                onUpload = { series, chapters ->
-                    scope.launch {
-                        seriesDao.upsertSeries(series)
-                        chapters.forEach { seriesDao.upsertChapter(it) }
-                    }
-                }
             )
         }
         composable(route = Settings.route) {
@@ -93,8 +88,19 @@ fun AppNavHost(
             val seriesId = navBackStackEntry.arguments?.getLong(Series.seriesIdArgument)
 
             SeriesScreen(
-                seriesList = series,
-                seriesId = seriesId
+                seriesList = seriesList,
+                seriesId = seriesId,
+                onNavigateBack = { navController.navigateUp() },
+                onDeleteSeries = {
+                    val series = seriesList.find { it.series.seriesId == seriesId }
+                    scope.launch {
+                        if (series != null) {
+                            seriesDao.deleteSeries(series.series)
+                            series.chapters.forEach { seriesDao.deleteChapter(it) }
+                        }
+                        navController.navigateSingleTopTo(Library.route)
+                    }
+                }
             )
         }
     }

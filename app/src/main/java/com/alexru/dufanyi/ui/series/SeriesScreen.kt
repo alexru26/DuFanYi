@@ -21,6 +21,7 @@ import androidx.compose.material.icons.outlined.DownloadForOffline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,17 +33,42 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.alexru.dufanyi.database.entity.Chapter
-import com.alexru.dufanyi.database.entity.Series
 import com.alexru.dufanyi.database.entity.SeriesWithChapters
+import com.alexru.dufanyi.ui.components.SeriesTopBar
 
 @Composable
 fun SeriesScreen(
     seriesList: List<SeriesWithChapters>,
     seriesId: Long? = 0,
+    onNavigateBack: () -> Unit,
+    onDeleteSeries: () -> Unit
+) {
+    Scaffold(
+        topBar = {
+            SeriesTopBar(
+                onNavigateBack = onNavigateBack,
+                onDeleteSeries = onDeleteSeries
+            )
+        },
+    ) { innerPadding ->
+        SeriesScreen(
+            seriesList = seriesList,
+            seriesId = seriesId,
+            modifier = Modifier
+                .padding(innerPadding)
+        )
+    }
+}
+
+@Composable
+fun SeriesScreen(
+    seriesList: List<SeriesWithChapters>,
+    seriesId: Long? = 0,
+    modifier: Modifier
 ) {
     Surface(
-        color = Color.White,
-        modifier = Modifier
+        color = MaterialTheme.colorScheme.surface,
+        modifier = modifier
             .fillMaxSize()
     ) {
         val series = remember(seriesId) { seriesList.find { it.series.seriesId == seriesId } }
@@ -159,7 +185,7 @@ fun chapterListing(
         chapters.sortedByDescending { it.number } .forEach { chapter ->
             Surface(
                 onClick = {},
-                color = Color.White,
+                color = MaterialTheme.colorScheme.surface,
                 modifier = Modifier
                     .padding(vertical = 4.dp)
             ) {

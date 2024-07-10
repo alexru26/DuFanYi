@@ -17,7 +17,10 @@ import kotlinx.serialization.json.Json
 import java.util.Date
 
 @Database(
-    entities = [Series::class],
+    entities = [
+        Series::class,
+        Chapter::class
+   ],
     version = 1
 )
 abstract class SeriesDatabase: RoomDatabase() {

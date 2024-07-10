@@ -2,15 +2,15 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "0280eff6d678e084698820f845ec9b57",
+    "identityHash": "1d050fc2a1e40656d6adb01f9da27171",
     "entities": [
       {
         "tableName": "Series",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `author` TEXT NOT NULL, `status` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`seriesId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `author` TEXT NOT NULL, `status` TEXT NOT NULL)",
         "fields": [
           {
-            "fieldPath": "id",
-            "columnName": "id",
+            "fieldPath": "seriesId",
+            "columnName": "seriesId",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -36,14 +36,56 @@
         "primaryKey": {
           "autoGenerate": true,
           "columnNames": [
-            "id"
+            "seriesId"
+          ]
+        }
+      },
+      {
+        "tableName": "Chapter",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`chapterId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `number` INTEGER NOT NULL, `name` TEXT NOT NULL, `text` TEXT NOT NULL, `seriesCreatorId` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "chapterId",
+            "columnName": "chapterId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "number",
+            "columnName": "number",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "text",
+            "columnName": "text",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "seriesCreatorId",
+            "columnName": "seriesCreatorId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "chapterId"
           ]
         }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0280eff6d678e084698820f845ec9b57')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1d050fc2a1e40656d6adb01f9da27171')"
     ]
   }
 }

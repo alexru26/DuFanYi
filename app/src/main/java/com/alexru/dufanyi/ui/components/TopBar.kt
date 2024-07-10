@@ -3,6 +3,7 @@ package com.alexru.dufanyi.ui.components
 import com.alexru.dufanyi.AppDestination
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.MoreVert
@@ -15,21 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-
-@Composable
-fun TopBar(
-    currentScreen: AppDestination,
-    onNavigateBack: () -> Unit
-) {
-    when(currentScreen.route) {
-        "library" -> LibraryTopBar()
-        "browse" -> BrowseTopBar()
-        "settings" -> SettingsTopBar()
-        "series" -> SeriesTopBar(
-            onNavigateBack
-        )
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -118,7 +104,8 @@ fun SettingsTopBar() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SeriesTopBar(
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onDeleteSeries: () -> Unit,
 ) {
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -137,10 +124,10 @@ fun SeriesTopBar(
         },
         actions = {
             IconButton(
-                onClick = {},
+                onClick = { onDeleteSeries() },
             ) {
                 Icon(
-                    imageVector = Icons.Default.Download,
+                    imageVector = Icons.Default.Delete,
                     contentDescription = "download"
                 )
             }

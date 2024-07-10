@@ -5,6 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -19,19 +20,21 @@ import com.alexru.dufanyi.navBarAppScreens
 import com.alexru.dufanyi.navigateSingleTopTo
 import com.alexru.dufanyi.networking.ShukuClient
 import com.alexru.dufanyi.ui.components.BottomNavigation
-import com.alexru.dufanyi.ui.components.TopBar
 
 @Composable
 fun ChineseSupportReaderApp(
     seriesDao: SeriesDao,
     shukuClient: ShukuClient
 ) {
+    val series by seriesDao.getAllSeriesWithChapters().collectAsState(initial = emptyList())
+    val scope = rememberCoroutineScope()
+
     val navController = rememberNavController()
 
     val currentBackStack by navController.currentBackStackEntryAsState()
     val currentDestination = currentBackStack?.destination
 
-    val currentScreen = appScreens.find { it.routeWithArgs == currentDestination?.route } ?: Library
+    var currentScreen = appScreens.find { it.routeWithArgs == currentDestination?.route } ?: Library
 
     var bottomBarState by rememberSaveable { mutableStateOf(true) }
 
@@ -50,12 +53,6 @@ fun ChineseSupportReaderApp(
     }
 
     Scaffold(
-        topBar = {
-            TopBar(
-                currentScreen = currentScreen,
-                onNavigateBack = { navController.navigateUp() }
-            )
-        },
         bottomBar = {
             BottomNavigation(
                 visibleState = bottomBarState,

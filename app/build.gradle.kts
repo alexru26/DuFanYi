@@ -18,9 +18,9 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        ksp {
-            arg("room.schemaLocation", "$projectDir/schemas")
-        }
+//        ksp {
+//            arg("room.schemaLocation", "$projectDir/schemas")
+//        }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -58,7 +58,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

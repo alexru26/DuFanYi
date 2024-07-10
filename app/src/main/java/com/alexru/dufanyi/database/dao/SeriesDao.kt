@@ -28,6 +28,9 @@ interface SeriesDao {
     @Query("DELETE FROM series")
     suspend fun deleteAll()
 
+    @Query("SELECT * FROM series WHERE name = :name")
+    suspend fun getSeriesByName(name: String): Series
+
     @Transaction
     @Query("SELECT * FROM series")
     fun getAllSeriesWithChapters(): Flow<List<SeriesWithChapters>>
