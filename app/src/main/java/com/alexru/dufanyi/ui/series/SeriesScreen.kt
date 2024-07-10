@@ -40,6 +40,7 @@ import com.alexru.dufanyi.ui.components.SeriesTopBar
 fun SeriesScreen(
     seriesList: List<SeriesWithChapters>,
     seriesId: Long? = 0,
+    onChapterClick: (Long) -> Unit,
     onNavigateBack: () -> Unit,
     onDeleteSeries: () -> Unit
 ) {
@@ -54,6 +55,7 @@ fun SeriesScreen(
         SeriesScreen(
             seriesList = seriesList,
             seriesId = seriesId,
+            onChapterClick = onChapterClick,
             modifier = Modifier
                 .padding(innerPadding)
         )
@@ -64,6 +66,7 @@ fun SeriesScreen(
 fun SeriesScreen(
     seriesList: List<SeriesWithChapters>,
     seriesId: Long? = 0,
+    onChapterClick: (Long) -> Unit,
     modifier: Modifier
 ) {
     Surface(
@@ -84,7 +87,8 @@ fun SeriesScreen(
             Spacer(Modifier.height(12.dp))
             if (series != null) {
                 chapterListing(
-                    series.chapters
+                    chapters = series.chapters,
+                    onChapterClick = onChapterClick
                 )
             }
         }
@@ -157,6 +161,7 @@ fun seriesTitleCardText(
 @Composable
 fun chapterListing(
     chapters: List<Chapter>,
+    onChapterClick: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -184,7 +189,7 @@ fun chapterListing(
             )
         chapters.sortedByDescending { it.number } .forEach { chapter ->
             Surface(
-                onClick = {},
+                onClick = { onChapterClick(chapter.chapterId) },
                 color = MaterialTheme.colorScheme.surface,
                 modifier = Modifier
                     .padding(vertical = 4.dp)

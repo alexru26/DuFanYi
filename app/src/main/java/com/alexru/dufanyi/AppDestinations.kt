@@ -2,12 +2,14 @@ package com.alexru.dufanyi
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.TravelExplore
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.alexru.dufanyi.Series.seriesIdArgument
 
 interface AppDestination {
     val icon: ImageVector
@@ -43,6 +45,16 @@ object Series: AppDestination {
     )
 }
 
+object Reader: AppDestination {
+    override val icon = Icons.Default.Book
+    override val route = "reader"
+    const val readerIdArgument = "id"
+    override val routeWithArgs = "${route}/{$readerIdArgument}"
+    val arguments = listOf(
+        navArgument(readerIdArgument) { type = NavType.LongType }
+    )
+}
+
 val navBarAppScreens = listOf(Library, Browse, Settings)
 
-val appScreens = listOf(Library, Browse, Settings, Series)
+val appScreens = listOf(Library, Browse, Settings, Series, Reader)

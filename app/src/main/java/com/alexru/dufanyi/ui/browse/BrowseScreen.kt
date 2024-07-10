@@ -164,15 +164,35 @@ suspend fun extractChaptersData(
     for(i in 2..chaptersLength+1) {
         var text = ""
         shukuClient.getData(url.substring(0, url.length-5)+"_"+i+".html")
-            .onSuccess { it ->
-                text = "hello"
+            .onSuccess {
+                val startIndex = it.indexOf("<div class=\"book_con fix\" id=\"text\">")+36
+                var endIndex = startIndex
+                var check = it.substring(endIndex, endIndex+6)
+                while(check != "</div>") {
+                    endIndex++
+                    check = it.substring(endIndex, endIndex+6)
+                }
+                text = it.substring(startIndex, endIndex)
+
+                text = text.replace("<p>", "").replace("</p>", "")
+
+                while(text.indexOf("<a href") != -1) {
+                    val startOfA = text.indexOf("<a href")
+                    val endOfA = text.indexOf("</a>")+4
+                    val substring = text.substring(startOfA, endOfA)
+                    println(substring)
+                    val carrotIndex = substring.indexOf(">")
+                    val actualText = substring.substring(carrotIndex+1, substring.length-4)
+                    println(actualText)
+                    text = text.replace(substring, actualText)
+                }
             }
             .onError {
                 println(it)
             }
         val chapter = Chapter(
             number = (i-1).toLong(),
-            name = "Chapter " + (i-1),
+            name = "Page " + (i-1),
             text = text,
             seriesCreatorId = id
         )

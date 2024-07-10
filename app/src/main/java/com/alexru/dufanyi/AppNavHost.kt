@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 import com.alexru.dufanyi.networking.ShukuClient
 import com.alexru.dufanyi.ui.browse.BrowseScreen
 import com.alexru.dufanyi.ui.library.LibraryScreen
+import com.alexru.dufanyi.ui.reader.ReaderScreen
 import com.alexru.dufanyi.ui.series.SeriesScreen
 import com.alexru.dufanyi.ui.settings.SettingsScreen
 
@@ -90,6 +91,7 @@ fun AppNavHost(
             SeriesScreen(
                 seriesList = seriesList,
                 seriesId = seriesId,
+                onChapterClick = { chapterId -> navController.navigateToReaderScreen(chapterId) },
                 onNavigateBack = { navController.navigateUp() },
                 onDeleteSeries = {
                     val series = seriesList.find { it.series.seriesId == seriesId }
@@ -103,18 +105,34 @@ fun AppNavHost(
                 }
             )
         }
+        composable(
+            route = Reader.routeWithArgs,
+            arguments = Reader.arguments
+        ) { navBackStackEntry ->
+            val chapterId = navBackStackEntry.arguments?.getLong(Reader.readerIdArgument)
+
+            ReaderScreen(
+                seriesList = seriesList,
+                chapterId = chapterId,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
     }
 }
 
 fun NavHostController.navigateSingleTopTo(route: String) =
     this.navigate(route) {
-        popUpTo(this@navigateSingleTopTo.graph.findStartDestination().id) {
-            saveState = true
-        }
+//        popUpTo(this@navigateSingleTopTo.graph.findStartDestination().id) {
+//            saveState = true
+//        }
         launchSingleTop = true
         restoreState = true
     }
 
 private fun NavHostController.navigateToSeriesScreen(seriesId: Long) {
     this.navigateSingleTopTo("${Series.route}/$seriesId")
+}
+
+private fun NavHostController.navigateToReaderScreen(chapterId: Long) {
+    this.navigateSingleTopTo("${Reader.route}/$chapterId")
 }

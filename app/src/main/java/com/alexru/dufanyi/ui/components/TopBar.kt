@@ -150,3 +150,29 @@ fun SeriesTopBar(
         }
     )
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ReaderTopBar(
+    onNavigateBack: () -> Unit,
+) {
+    TopAppBar(
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        ),
+        title = { Text("Reader")  },
+        navigationIcon = {
+            IconButton(
+                onClick = { onNavigateBack() },
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "back"
+                )
+            }
+        },
+        actions = {
+
+        }
+    )
+}

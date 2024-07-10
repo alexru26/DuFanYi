@@ -13,6 +13,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.alexru.dufanyi.AppNavHost
 import com.alexru.dufanyi.Library
+import com.alexru.dufanyi.Reader
 import com.alexru.dufanyi.Series
 import com.alexru.dufanyi.appScreens
 import com.alexru.dufanyi.database.dao.SeriesDao
@@ -26,9 +27,6 @@ fun ChineseSupportReaderApp(
     seriesDao: SeriesDao,
     shukuClient: ShukuClient
 ) {
-    val series by seriesDao.getAllSeriesWithChapters().collectAsState(initial = emptyList())
-    val scope = rememberCoroutineScope()
-
     val navController = rememberNavController()
 
     val currentBackStack by navController.currentBackStackEntryAsState()
@@ -39,11 +37,11 @@ fun ChineseSupportReaderApp(
     var bottomBarState by rememberSaveable { mutableStateOf(true) }
 
     LaunchedEffect(true) {
-        seriesDao.deleteAll()
+//        seriesDao.deleteAll()
     }
 
     bottomBarState = when(currentScreen) {
-        Series -> {
+        Series, Reader -> {
             false
         }
 

@@ -50,10 +50,7 @@ fun LibraryScreen(
         modifier = modifier
             .fillMaxSize()
     ) {
-        if(seriesList.isEmpty()) {
-            isEmptyCard()
-        }
-        else {
+        if(seriesList.isNotEmpty()) {
             SeriesCollection(
                 seriesList = seriesList,
                 onSeriesClick = onSeriesClick,
@@ -84,15 +81,5 @@ fun SeriesCollection(
                 series = item
             )
         }
-    }
-}
-
-@Composable
-fun isEmptyCard() {
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("Upload a file in Browse")
     }
 }
