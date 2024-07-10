@@ -26,8 +26,6 @@ fun ChineseSupportReaderApp(
     seriesDao: SeriesDao,
     shukuClient: ShukuClient
 ) {
-    val series by seriesDao.getAllSeries().collectAsState(initial = emptyList())
-
     val navController = rememberNavController()
 
     val currentBackStack by navController.currentBackStackEntryAsState()
@@ -69,7 +67,6 @@ fun ChineseSupportReaderApp(
     ) { innerPadding ->
         AppNavHost(
             navController = navController,
-            seriesEntities = series,
             seriesDao = seriesDao,
             shukuClient = shukuClient,
             modifier = Modifier.padding(innerPadding)

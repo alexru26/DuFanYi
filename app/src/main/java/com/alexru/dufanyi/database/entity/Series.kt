@@ -5,10 +5,8 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class Series(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    @PrimaryKey(autoGenerate = true) val seriesId: Long = 0,
     val name: String,
     val author: String,
-    val status: String
-//    val cover: String,
-//    val chapters: List<Int>
+    val status: String,
 )

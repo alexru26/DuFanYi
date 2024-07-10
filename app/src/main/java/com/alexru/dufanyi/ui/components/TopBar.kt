@@ -39,7 +39,7 @@ fun LibraryTopBar() {
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         ),
         title = {
-            Text("com.alexru.dufanyi.Library")
+            Text("Library")
         },
         actions = {
             IconButton(
@@ -78,7 +78,7 @@ fun BrowseTopBar() {
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         ),
         title = {
-            Text("com.alexru.dufanyi.Browse")
+            Text("Browse")
         },
         actions = {
             IconButton(
@@ -109,7 +109,7 @@ fun SettingsTopBar() {
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         ),
         title = {
-            Text("com.alexru.dufanyi.Settings")
+            Text("Settings")
         },
         actions = {  }
     )

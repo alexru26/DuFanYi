@@ -1,7 +1,6 @@
 package com.alexru.dufanyi.networking
 
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import io.ktor.util.network.UnresolvedAddressException
@@ -13,7 +12,7 @@ class ShukuClient(
     private val httpClient: HttpClient
 ) {
 
-    suspend fun getSeriesData(seriesUrl: String): Result<String, NetworkError> {
+    suspend fun getData(seriesUrl: String): Result<String, NetworkError> {
         val response = try {
             httpClient.get(
                 urlString = seriesUrl

@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.alexru.dufanyi.database.entity.Chapter
 import com.alexru.dufanyi.database.entity.Series
 import kotlinx.coroutines.launch
 import com.alexru.dufanyi.networking.ShukuClient
@@ -28,14 +29,14 @@ import util.onSuccess
 @Composable
 fun BrowseScreen(
     shukuClient: ShukuClient,
-    onUpload: (Series) -> Unit,
+    onUpload: (Series, List<Chapter>) -> Unit,
 ) {
     Surface(
         color = Color.White,
         modifier = Modifier
             .fillMaxSize()
     ) {
-        seriesUploadDialog(
+        SeriesUploadDialog(
             shukuClient = shukuClient,
             onUpload = onUpload
         )
@@ -43,9 +44,9 @@ fun BrowseScreen(
 }
 
 @Composable
-fun seriesUploadDialog(
+fun SeriesUploadDialog(
     shukuClient: ShukuClient,
-    onUpload: (Series) -> Unit
+    onUpload: (Series, List<Chapter>) -> Unit
 ) {
     var text by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
@@ -69,10 +70,11 @@ fun seriesUploadDialog(
             onClick = {
                 scope.launch {
                     isLoading = true
-                    shukuClient.getSeriesData(text)
+                    shukuClient.getData(text)
                         .onSuccess {
-                            val series = extractData(it)
-                            onUpload(series)
+                            val series = extractSeriesData(it)
+                            val chapters = extractChaptersData(it, shukuClient, text, series)
+                            onUpload(series, chapters)
                         }
                         .onError {
                             println(it)
@@ -98,17 +100,17 @@ fun seriesUploadDialog(
     }
 }
 
-fun extractData(
+fun extractSeriesData(
     response: String
 ): Series {
-    val start_index = response.indexOf("<h1 class=\"article-title\">")+26
-    var end_index = start_index
-    var check = response.substring(end_index, end_index+5)
+    val startIndex = response.indexOf("<h1 class=\"article-title\">")+26
+    var endIndex = startIndex
+    var check = response.substring(endIndex, endIndex+5)
     while(check != "</h1>") {
-        end_index++
-        check = response.substring(end_index, end_index+5)
+        endIndex++
+        check = response.substring(endIndex, endIndex+5)
     }
-    val full = response.substring(start_index, end_index)
+    val full = response.substring(startIndex, endIndex)
 
     val name = full.substring(0, full.indexOf("_"))
     val author = full.substring(full.indexOf("_")+1, full.indexOf("【"))
@@ -117,6 +119,32 @@ fun extractData(
     return Series(
         name = name,
         author = author,
-        status = status
+        status = status,
     )
+}
+
+suspend fun extractChaptersData(
+    response: String,
+    shukuClient: ShukuClient,
+    url: String,
+    series: Series
+): List<Chapter> {
+    val chaptersLength: Int = (response.length-response.replace("<li class=\"mulu\">", "").length)/17
+    val list = mutableListOf<Chapter>()
+    for(i in 2..chaptersLength+1) {
+        shukuClient.getData(url.substring(0, url.length-5)+"_"+i+".html")
+            .onSuccess {
+                val chapter = Chapter(
+                    number = (i-1).toLong(),
+                    name = "Chapter " + (i-1),
+                    text = "",
+                    seriesCreatorId = series.seriesId
+                )
+                list.add(chapter)
+            }
+            .onError {
+                println(it)
+            }
+    }
+    return list
 }

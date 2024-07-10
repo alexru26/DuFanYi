@@ -15,11 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.alexru.dufanyi.database.entity.Series
+import com.alexru.dufanyi.database.entity.SeriesWithChapters
 import com.alexru.dufanyi.ui.components.SeriesCard
 
 @Composable
 fun LibraryScreen(
-    series: List<Series>,
+    seriesList: List<SeriesWithChapters>,
     onSeriesClick: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -28,12 +29,12 @@ fun LibraryScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        if(series.isEmpty()) {
+        if(seriesList.isEmpty()) {
             isEmptyCard()
         }
         else {
             SeriesCollection(
-                series = series,
+                seriesList = seriesList,
                 onSeriesClick = onSeriesClick,
                 modifier = modifier
             )
@@ -43,7 +44,7 @@ fun LibraryScreen(
 
 @Composable
 fun SeriesCollection(
-    series: List<Series>,
+    seriesList: List<SeriesWithChapters>,
     onSeriesClick: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -57,7 +58,7 @@ fun SeriesCollection(
         ),
         modifier = modifier
     ) {
-        items(series) { item ->
+        items(seriesList) { item ->
             SeriesCard(
                 onSeriesClick = onSeriesClick,
                 series = item
@@ -72,6 +73,6 @@ fun isEmptyCard() {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Upload a file in com.alexru.dufanyi.Browse")
+        Text("Upload a file in Browse")
     }
 }

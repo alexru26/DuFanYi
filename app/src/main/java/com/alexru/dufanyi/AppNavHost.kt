@@ -8,6 +8,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -25,11 +27,11 @@ import com.alexru.dufanyi.ui.settings.SettingsScreen
 @Composable
 fun AppNavHost(
     navController: NavHostController,
-    seriesEntities: List<com.alexru.dufanyi.database.entity.Series>,
     seriesDao: SeriesDao,
     shukuClient: ShukuClient,
     modifier: Modifier = Modifier
 ) {
+    val series by seriesDao.getAllSeriesWithChapters().collectAsState(initial = emptyList())
     val scope = rememberCoroutineScope()
     NavHost(
         navController = navController,
@@ -42,16 +44,17 @@ fun AppNavHost(
     ) {
         composable(route = Library.route) {
             LibraryScreen(
-                series = seriesEntities,
+                seriesList = series,
                 onSeriesClick = { seriesId -> navController.navigateToSeriesScreen(seriesId) }
             )
         }
         composable(route = Browse.route) {
             BrowseScreen(
                 shukuClient = shukuClient,
-                onUpload = { series ->
+                onUpload = { series, chapters ->
                     scope.launch {
-                        seriesDao.upsert(series)
+                        seriesDao.upsertSeries(series)
+                        chapters.forEach { seriesDao.upsertChapter(it) }
                     }
                 }
             )
@@ -90,7 +93,7 @@ fun AppNavHost(
             val seriesId = navBackStackEntry.arguments?.getLong(Series.seriesIdArgument)
 
             SeriesScreen(
-                seriesEntities = seriesEntities,
+                seriesList = series,
                 seriesId = seriesId
             )
         }

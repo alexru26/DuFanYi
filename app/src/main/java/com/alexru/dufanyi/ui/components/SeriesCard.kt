@@ -19,17 +19,17 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.alexru.dufanyi.database.entity.Series
+import com.alexru.dufanyi.database.entity.SeriesWithChapters
 
 @Composable
 fun SeriesCard(
     onSeriesClick: (Long) -> Unit,
-    series: Series,
+    series: SeriesWithChapters,
     modifier: Modifier = Modifier
 ) {
     Surface(
         shape = MaterialTheme.shapes.medium,
-        onClick = { onSeriesClick(series.id) },
+        onClick = { onSeriesClick(series.series.seriesId) },
         modifier = modifier
             .padding(2.dp)
     ) {
@@ -77,7 +77,7 @@ fun SeriesCard(
                     .background(Color.Gray)
             )
             Text(
-                text = series.name,
+                text = series.series.name,
                 color = Color.White,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,

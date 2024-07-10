@@ -1,18 +1,25 @@
 package com.alexru.dufanyi.ui.series
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.DownloadForOffline
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -22,12 +29,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.alexru.dufanyi.database.entity.Chapter
 import com.alexru.dufanyi.database.entity.Series
+import com.alexru.dufanyi.database.entity.SeriesWithChapters
 
 @Composable
 fun SeriesScreen(
-    seriesEntities: List<Series>,
+    seriesList: List<SeriesWithChapters>,
     seriesId: Long? = 0,
 ) {
     Surface(
@@ -35,7 +45,7 @@ fun SeriesScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        val series = remember(seriesId) { seriesEntities.find { it.id == seriesId } }
+        val series = remember(seriesId) { seriesList.find { it.series.seriesId == seriesId } }
         Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
@@ -46,16 +56,18 @@ fun SeriesScreen(
                 )
             }
             Spacer(Modifier.height(12.dp))
-//            chapterListing(
-//                series.chapters
-//            )
+            if (series != null) {
+                chapterListing(
+                    series.chapters
+                )
+            }
         }
     }
 }
 
 @Composable
 fun titleCard(
-    series: Series,
+    series: SeriesWithChapters,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -88,7 +100,7 @@ fun titleCard(
 
 @Composable
 fun seriesTitleCardText(
-    series: Series,
+    series: SeriesWithChapters,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -96,19 +108,19 @@ fun seriesTitleCardText(
             .padding(horizontal = 16.dp)
     ) {
         Text(
-            text = series.name,
+            text = series.series.name,
             style = MaterialTheme.typography.titleLarge,
             modifier = modifier
                 .padding(bottom = 4.dp)
         )
         Text(
-            text = series.author,
+            text = series.series.author,
             style = MaterialTheme.typography.labelLarge,
             modifier = modifier
                 .padding(bottom = 4.dp)
         )
         Text(
-            text = series.status,
+            text = series.series.status,
             style = MaterialTheme.typography.labelLarge,
             modifier = modifier
                 .padding(bottom = 4.dp)
@@ -116,7 +128,6 @@ fun seriesTitleCardText(
     }
 }
 
-/*
 @Composable
 fun chapterListing(
     chapters: List<Chapter>,
@@ -163,7 +174,7 @@ fun chapterListing(
                             .padding(start = 16.dp)
                     ) {
                         Text(chapter.name, Modifier.padding(bottom = 12.dp))
-                        Text(chapter.date)
+//                        Text(chapter.date)
                     }
                     IconButton(
                         onClick = {},
@@ -180,4 +191,3 @@ fun chapterListing(
         }
     }
 }
- */
