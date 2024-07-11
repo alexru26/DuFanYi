@@ -6,7 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.remember
 import com.alexru.dufanyi.database.getSeriesDatabase
-import com.alexru.dufanyi.networking.ShukuClient
+import com.alexru.dufanyi.networking.NetClient
 import com.alexru.dufanyi.networking.createHttpClient
 import com.alexru.dufanyi.ui.theme.DuFanYiAppTheme
 
@@ -19,8 +19,8 @@ class MainActivity : ComponentActivity() {
             DuFanYiAppTheme {
                 ChineseSupportReaderApp(
                     seriesDao = dao,
-                    shukuClient = remember {
-                        ShukuClient(createHttpClient())
+                    netClient = remember {
+                        NetClient(createHttpClient())
                     }
                 )
             }

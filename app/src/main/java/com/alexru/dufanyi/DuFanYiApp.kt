@@ -2,10 +2,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -19,13 +17,13 @@ import com.alexru.dufanyi.appScreens
 import com.alexru.dufanyi.database.dao.SeriesDao
 import com.alexru.dufanyi.navBarAppScreens
 import com.alexru.dufanyi.navigateSingleTopTo
-import com.alexru.dufanyi.networking.ShukuClient
+import com.alexru.dufanyi.networking.NetClient
 import com.alexru.dufanyi.ui.components.BottomNavigation
 
 @Composable
 fun ChineseSupportReaderApp(
     seriesDao: SeriesDao,
-    shukuClient: ShukuClient
+    netClient: NetClient
 ) {
     val navController = rememberNavController()
 
@@ -63,7 +61,7 @@ fun ChineseSupportReaderApp(
         AppNavHost(
             navController = navController,
             seriesDao = seriesDao,
-            shukuClient = shukuClient,
+            netClient = netClient,
             modifier = Modifier.padding(innerPadding)
         )
     }

@@ -25,17 +25,15 @@ import com.alexru.dufanyi.database.dao.SeriesDao
 import com.alexru.dufanyi.database.entity.Chapter
 import com.alexru.dufanyi.database.entity.Series
 import kotlinx.coroutines.launch
-import com.alexru.dufanyi.networking.ShukuClient
+import com.alexru.dufanyi.networking.NetClient
 import com.alexru.dufanyi.ui.components.BrowseTopBar
-import com.alexru.dufanyi.ui.components.LibraryTopBar
-import com.alexru.dufanyi.ui.library.LibraryScreen
 import util.onError
 import util.onSuccess
 
 @Composable
 fun BrowseScreen(
     seriesDao: SeriesDao,
-    shukuClient: ShukuClient
+    netClient: NetClient
 ) {
     Scaffold(
         topBar = {
@@ -44,7 +42,7 @@ fun BrowseScreen(
     ) { innerPadding ->
         BrowseScreen(
             seriesDao = seriesDao,
-            shukuClient = shukuClient,
+            netClient = netClient,
             modifier = Modifier
                 .padding(innerPadding)
         )
@@ -54,7 +52,7 @@ fun BrowseScreen(
 @Composable
 fun BrowseScreen(
     seriesDao: SeriesDao,
-    shukuClient: ShukuClient,
+    netClient: NetClient,
     modifier: Modifier
 ) {
     Surface(
@@ -64,7 +62,7 @@ fun BrowseScreen(
     ) {
         SeriesUploadDialog(
             seriesDao = seriesDao,
-            shukuClient = shukuClient,
+            netClient = netClient,
         )
     }
 }
@@ -72,7 +70,7 @@ fun BrowseScreen(
 @Composable
 fun SeriesUploadDialog(
     seriesDao: SeriesDao,
-    shukuClient: ShukuClient
+    netClient: NetClient
 ) {
     var text by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
@@ -96,11 +94,11 @@ fun SeriesUploadDialog(
             onClick = {
                 scope.launch {
                     isLoading = true
-                    shukuClient.getData(text)
+                    netClient.getData(text)
                         .onSuccess { response ->
                             val series = extractSeriesData(response)
                             seriesDao.upsertSeries(series)
-                            val chapters = extractChaptersData(response, shukuClient, text, seriesDao, series)
+                            val chapters = extractChaptersData(response, netClient, text, seriesDao, series)
                             chapters.forEach { seriesDao.upsertChapter(it) }
                         }
                         .onError {
@@ -152,7 +150,7 @@ fun extractSeriesData(
 
 suspend fun extractChaptersData(
     response: String,
-    shukuClient: ShukuClient,
+    netClient: NetClient,
     url: String,
     seriesDao: SeriesDao,
     series: Series
@@ -163,7 +161,7 @@ suspend fun extractChaptersData(
     val id = seriesDao.getSeriesByName(series.name).seriesId
     for(i in 2..chaptersLength+1) {
         var text = ""
-        shukuClient.getData(url.substring(0, url.length-5)+"_"+i+".html")
+        netClient.getData(url.substring(0, url.length-5)+"_"+i+".html")
             .onSuccess {
                 val startIndex = it.indexOf("<div class=\"book_con fix\" id=\"text\">")+36
                 var endIndex = startIndex

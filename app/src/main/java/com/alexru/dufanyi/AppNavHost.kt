@@ -12,13 +12,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.alexru.dufanyi.database.dao.SeriesDao
 import kotlinx.coroutines.launch
-import com.alexru.dufanyi.networking.ShukuClient
+import com.alexru.dufanyi.networking.NetClient
 import com.alexru.dufanyi.ui.browse.BrowseScreen
 import com.alexru.dufanyi.ui.library.LibraryScreen
 import com.alexru.dufanyi.ui.reader.ReaderScreen
@@ -29,7 +28,7 @@ import com.alexru.dufanyi.ui.settings.SettingsScreen
 fun AppNavHost(
     navController: NavHostController,
     seriesDao: SeriesDao,
-    shukuClient: ShukuClient,
+    netClient: NetClient,
     modifier: Modifier = Modifier
 ) {
     val seriesList by seriesDao.getAllSeriesWithChapters().collectAsState(initial = emptyList())
@@ -52,7 +51,7 @@ fun AppNavHost(
         composable(route = Browse.route) {
             BrowseScreen(
                 seriesDao = seriesDao,
-                shukuClient = shukuClient,
+                netClient = netClient,
             )
         }
         composable(route = Settings.route) {

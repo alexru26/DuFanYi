@@ -8,7 +8,7 @@ import kotlinx.serialization.SerializationException
 import util.Result
 import util.NetworkError
 
-class ShukuClient(
+class NetClient(
     private val httpClient: HttpClient
 ) {
 
