@@ -6,5 +6,7 @@ Yes, the app name literally means "read translate."
 - Clicking a Series opens a page that displays basic information
   - Information includes chapter listing
   - Clicking chapter opens reader
-- Browse has button and textfield for url to add new series into library (temporary)
+- Browse has button that lets user choose txt and adds new series into library (temporary)
+  - txt file first three lines should be name, author, status
+  - txt file chapters should be "第X章 ..."
 - Settings does nothing right now
