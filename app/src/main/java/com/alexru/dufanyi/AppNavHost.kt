@@ -28,7 +28,6 @@ import com.alexru.dufanyi.ui.settings.SettingsScreen
 fun AppNavHost(
     navController: NavHostController,
     seriesDao: SeriesDao,
-    netClient: NetClient,
     modifier: Modifier = Modifier
 ) {
     val seriesList by seriesDao.getAllSeriesWithChapters().collectAsState(initial = emptyList())
@@ -51,7 +50,6 @@ fun AppNavHost(
         composable(route = Browse.route) {
             BrowseScreen(
                 seriesDao = seriesDao,
-                netClient = netClient,
             )
         }
         composable(route = Settings.route) {

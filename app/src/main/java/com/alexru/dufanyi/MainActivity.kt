@@ -18,10 +18,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             DuFanYiAppTheme {
                 ChineseSupportReaderApp(
-                    seriesDao = dao,
-                    netClient = remember {
-                        NetClient(createHttpClient())
-                    }
+                    seriesDao = dao
                 )
             }
         }

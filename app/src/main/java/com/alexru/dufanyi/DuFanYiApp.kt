@@ -22,15 +22,14 @@ import com.alexru.dufanyi.ui.components.BottomNavigation
 
 @Composable
 fun ChineseSupportReaderApp(
-    seriesDao: SeriesDao,
-    netClient: NetClient
+    seriesDao: SeriesDao
 ) {
     val navController = rememberNavController()
 
     val currentBackStack by navController.currentBackStackEntryAsState()
     val currentDestination = currentBackStack?.destination
 
-    var currentScreen = appScreens.find { it.routeWithArgs == currentDestination?.route } ?: Library
+    val currentScreen = appScreens.find { it.routeWithArgs == currentDestination?.route } ?: Library
 
     var bottomBarState by rememberSaveable { mutableStateOf(true) }
 
@@ -61,7 +60,6 @@ fun ChineseSupportReaderApp(
         AppNavHost(
             navController = navController,
             seriesDao = seriesDao,
-            netClient = netClient,
             modifier = Modifier.padding(innerPadding)
         )
     }

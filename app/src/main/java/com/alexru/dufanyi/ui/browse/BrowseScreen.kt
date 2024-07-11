@@ -1,5 +1,9 @@
 package com.alexru.dufanyi.ui.browse
 
+import android.content.Context
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -12,6 +16,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.alexru.dufanyi.database.dao.SeriesDao
 import com.alexru.dufanyi.database.entity.Chapter
@@ -29,11 +35,12 @@ import com.alexru.dufanyi.networking.NetClient
 import com.alexru.dufanyi.ui.components.BrowseTopBar
 import util.onError
 import util.onSuccess
+import java.io.BufferedReader
+import java.io.InputStreamReader
 
 @Composable
 fun BrowseScreen(
     seriesDao: SeriesDao,
-    netClient: NetClient
 ) {
     Scaffold(
         topBar = {
@@ -42,7 +49,6 @@ fun BrowseScreen(
     ) { innerPadding ->
         BrowseScreen(
             seriesDao = seriesDao,
-            netClient = netClient,
             modifier = Modifier
                 .padding(innerPadding)
         )
@@ -52,7 +58,6 @@ fun BrowseScreen(
 @Composable
 fun BrowseScreen(
     seriesDao: SeriesDao,
-    netClient: NetClient,
     modifier: Modifier
 ) {
     Surface(
@@ -62,7 +67,6 @@ fun BrowseScreen(
     ) {
         SeriesUploadDialog(
             seriesDao = seriesDao,
-            netClient = netClient,
         )
     }
 }
@@ -70,11 +74,36 @@ fun BrowseScreen(
 @Composable
 fun SeriesUploadDialog(
     seriesDao: SeriesDao,
-    netClient: NetClient
 ) {
-    var text by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    val result = remember { mutableStateOf<Uri?>(null) }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
+        result.value = it
+    }
     var isLoading by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(result.value) {
+        result.value?.let { uri ->
+            isLoading = true
+            scope.launch {
+                val content = readTextFromUri(
+                    context = context,
+                    uri = uri
+                )
+                val series = extractSeriesData(
+                    content = content
+                )
+                seriesDao.upsertSeries(series)
+                val chapters = extractChaptersData(
+                    content = content,
+                    seriesId = seriesDao.getSeriesByName(series.name).seriesId
+                )
+                chapters.forEach { seriesDao.upsertChapter(it) }
+                isLoading = false
+            }
+        }
+    }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -84,29 +113,9 @@ fun SeriesUploadDialog(
                 vertical = 16.dp
             )
     ) {
-        TextField(
-            value = text,
-            onValueChange = { text = it },
-            label = { Text("Link") }
-        )
-
         Button(
             onClick = {
-                scope.launch {
-                    isLoading = true
-                    netClient.getData(text)
-                        .onSuccess { response ->
-                            val series = extractSeriesData(response)
-                            seriesDao.upsertSeries(series)
-                            val chapters = extractChaptersData(response, netClient, text, seriesDao, series)
-                            chapters.forEach { seriesDao.upsertChapter(it) }
-                        }
-                        .onError {
-                            println(it)
-                        }
-                    isLoading = false
-                    text = ""
-                }
+                launcher.launch(arrayOf("text/plain"))
             },
             modifier = Modifier
         ) {
@@ -125,76 +134,92 @@ fun SeriesUploadDialog(
     }
 }
 
-fun extractSeriesData(
-    response: String
-): Series {
-    val startIndex = response.indexOf("<h1 class=\"article-title\">")+26
-    var endIndex = startIndex
-    var check = response.substring(endIndex, endIndex+5)
-    while(check != "</h1>") {
-        endIndex++
-        check = response.substring(endIndex, endIndex+5)
+fun readTextFromUri(context: Context, uri: Uri): String {
+    val contentResolver = context.contentResolver
+    val inputStream = contentResolver.openInputStream(uri)
+    val reader = BufferedReader(InputStreamReader(inputStream))
+    val stringBuilder = StringBuilder()
+    var line: String?
+
+    try {
+        while (reader.readLine().also { line = it } != null) {
+            stringBuilder.append(line)
+            stringBuilder.append('\n')
+        }
+    } finally {
+        reader.close()
+        inputStream?.close()
     }
-    val full = response.substring(startIndex, endIndex)
 
-    val name = full.substring(0, full.indexOf("_"))
-    val author = full.substring(full.indexOf("_")+1, full.indexOf("【"))
-    val status = full.substring(full.indexOf("【")+1, full.length-1)
+    return stringBuilder.toString()
+}
 
+fun extractSeriesData(
+    content: String
+): Series {
+    val cs: CharSequence = content
+    val lines = cs.lines()
     return Series(
-        name = name,
-        author = author,
-        status = status,
+        name = lines[0],
+        author = lines[1],
+        status = lines[2]
     )
 }
 
-suspend fun extractChaptersData(
-    response: String,
-    netClient: NetClient,
-    url: String,
-    seriesDao: SeriesDao,
-    series: Series
+fun extractChaptersData(
+    content: String,
+    seriesId: Long
 ): List<Chapter> {
-    val chaptersLength: Int = (response.length-response.replace("<li class=\"mulu\">", "").length)/17
-    println(chaptersLength)
+    val cs: CharSequence = content
+    val lines = cs.lines().slice(3..<cs.lines().size)
+
     val list = mutableListOf<Chapter>()
-    val id = seriesDao.getSeriesByName(series.name).seriesId
-    for(i in 2..chaptersLength+1) {
-        var text = ""
-        netClient.getData(url.substring(0, url.length-5)+"_"+i+".html")
-            .onSuccess {
-                val startIndex = it.indexOf("<div class=\"book_con fix\" id=\"text\">")+36
-                var endIndex = startIndex
-                var check = it.substring(endIndex, endIndex+6)
-                while(check != "</div>") {
-                    endIndex++
-                    check = it.substring(endIndex, endIndex+6)
-                }
-                text = it.substring(startIndex, endIndex)
 
-                text = text.replace("<p>", "").replace("</p>", "")
+    var first = true
+    var number: Long = 1
+    var name = ""
+    var text: StringBuilder = StringBuilder()
 
-                while(text.indexOf("<a href") != -1) {
-                    val startOfA = text.indexOf("<a href")
-                    val endOfA = text.indexOf("</a>")+4
-                    val substring = text.substring(startOfA, endOfA)
-                    println(substring)
-                    val carrotIndex = substring.indexOf(">")
-                    val actualText = substring.substring(carrotIndex+1, substring.length-4)
-                    println(actualText)
-                    text = text.replace(substring, actualText)
-                }
+    val regex = Regex("""第(\d+)章\s*(?:(.+))?""")
+
+    for(i in lines.indices) {
+        val line = lines[i]
+        val matchResult = regex.matchEntire(line)
+
+        if(matchResult != null) {
+            val (chapterNumber, title) = matchResult.destructured
+
+            if(!first) {
+                list.add(Chapter(
+                    number = number,
+                    name = name,
+                    text = text.toString(),
+                    seriesCreatorId = seriesId
+                ))
             }
-            .onError {
-                println(it)
+            first = false
+
+            number = chapterNumber.toLong()
+            name = line
+
+            text = StringBuilder()
+            text.append(line)
+            text.append('\n')
+        }
+        else {
+            text.append(line)
+            text.append('\n')
+
+            if(i == lines.size-1) {
+                list.add(Chapter(
+                    number = number,
+                    name = name,
+                    text = text.toString(),
+                    seriesCreatorId = seriesId
+                ))
             }
-        val chapter = Chapter(
-            number = (i-1).toLong(),
-            name = "Page " + (i-1),
-            text = text,
-            seriesCreatorId = id
-        )
-        list.add(chapter)
+        }
     }
+
     return list
 }
