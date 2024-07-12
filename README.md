@@ -1,5 +1,5 @@
 # 读翻译 (DuFanYi)
-Yes, the app name literally means "read translate."
+Yes, the app name literally means "read translate." This app was heavily inspired by [TachiyomiSY](https://github.com/jobobby04/TachiyomiSY), a fantastic app to read manga. Thanks jobobby04 👍.
 
 ## App Architecture
 - Library displays Room database
