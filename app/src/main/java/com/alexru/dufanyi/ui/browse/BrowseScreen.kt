@@ -32,6 +32,7 @@ import com.alexru.dufanyi.database.entity.Series
 import kotlinx.coroutines.launch
 import com.alexru.dufanyi.ui.components.BrowseTopBar
 import java.io.BufferedReader
+import java.io.File
 import java.io.InputStreamReader
 
 @Composable
@@ -93,6 +94,7 @@ fun SeriesUploadDialog(
                 seriesDao.upsertSeries(series)
                 val chapters = extractChaptersData(
                     content = content,
+                    context = context,
                     seriesId = seriesDao.getSeriesByName(series.name).seriesId
                 )
                 chapters.forEach { seriesDao.upsertChapter(it) }
@@ -164,6 +166,7 @@ fun extractSeriesData(
 
 fun extractChaptersData(
     content: String,
+    context: Context,
     seriesId: Long
 ): List<Chapter> {
     val cs: CharSequence = content
@@ -178,6 +181,11 @@ fun extractChaptersData(
 
     val regex = Regex("""第(\d+)章\s*(.+)?""")
 
+    val directory = File(context.filesDir, seriesId.toString())
+    if (!directory.exists()) {
+        directory.mkdirs()
+    }
+
     for(i in lines.indices) {
         val line = lines[i]
         val matchResult = regex.matchEntire(line)
@@ -186,10 +194,12 @@ fun extractChaptersData(
             val (chapterNumber, title) = matchResult.destructured
 
             if(!first) {
+                val file = File(directory, chapterNumber)
+                file.writeText(text.toString())
                 list.add(Chapter(
                     number = number,
                     name = name,
-                    text = text.toString(),
+                    path = file.absolutePath,
                     seriesCreatorId = seriesId
                 ))
             }
@@ -207,10 +217,12 @@ fun extractChaptersData(
             text.append("\n")
 
             if(i == lines.size-1) {
+                val file = File(directory, number.toString())
+                file.writeText(text.toString())
                 list.add(Chapter(
                     number = number,
                     name = name,
-                    text = text.toString(),
+                    path = file.absolutePath,
                     seriesCreatorId = seriesId
                 ))
             }

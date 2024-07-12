@@ -18,6 +18,10 @@ import androidx.navigation.compose.composable
 import com.alexru.dufanyi.database.dao.SeriesDao
 import kotlinx.coroutines.launch
 import com.alexru.dufanyi.ui.browse.BrowseScreen
+import com.alexru.dufanyi.ui.components.enterTransition
+import com.alexru.dufanyi.ui.components.exitTransition
+import com.alexru.dufanyi.ui.components.popEnterTransition
+import com.alexru.dufanyi.ui.components.popExitTransition
 import com.alexru.dufanyi.ui.library.LibraryScreen
 import com.alexru.dufanyi.ui.reader.ReaderScreen
 import com.alexru.dufanyi.ui.series.SeriesScreen
@@ -59,28 +63,10 @@ fun AppNavHost(
         composable(
             route = Series.routeWithArgs,
             arguments = Series.arguments,
-            enterTransition = { slideInHorizontally(
-                animationSpec = tween(durationMillis = 200),
-                initialOffsetX = { fullWidth -> fullWidth/3 }
-            ) + fadeIn(
-                animationSpec = tween(durationMillis = 500)
-            )},
-            exitTransition = { fadeOut(
-                animationSpec = tween(durationMillis = 1)
-            )},
-            popEnterTransition = { slideInHorizontally(
-                animationSpec = tween(durationMillis = 200),
-                initialOffsetX = { fullWidth -> -fullWidth/3 }
-
-            ) + fadeIn(
-                animationSpec = tween(durationMillis = 500)
-            )},
-            popExitTransition = { slideOutHorizontally(
-                animationSpec = tween(durationMillis = 400),
-                targetOffsetX = { fullWidth -> fullWidth }
-            ) + fadeOut(
-                animationSpec = tween(durationMillis = 150)
-            )},
+            enterTransition = { enterTransition() },
+            exitTransition = { exitTransition() },
+            popEnterTransition = { popEnterTransition() },
+            popExitTransition = { popExitTransition() },
         ) { navBackStackEntry ->
             val seriesId = navBackStackEntry.arguments?.getLong(Series.seriesIdArgument)
 
@@ -103,7 +89,11 @@ fun AppNavHost(
         }
         composable(
             route = Reader.routeWithArgs,
-            arguments = Reader.arguments
+            arguments = Reader.arguments,
+            enterTransition = { enterTransition() },
+            exitTransition = { exitTransition() },
+            popEnterTransition = { popEnterTransition() },
+            popExitTransition = { popExitTransition() },
         ) { navBackStackEntry ->
             val chapterId = navBackStackEntry.arguments?.getLong(Reader.readerIdArgument)
 

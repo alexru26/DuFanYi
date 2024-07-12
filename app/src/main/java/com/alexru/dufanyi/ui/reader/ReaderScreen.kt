@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.alexru.dufanyi.database.entity.Chapter
 import com.alexru.dufanyi.database.entity.SeriesWithChapters
 import com.alexru.dufanyi.ui.components.ReaderTopBar
+import java.io.File
 import kotlin.math.ceil
 
 @Composable
@@ -59,7 +60,12 @@ fun ReaderScreen(
     }
     val chapter = remember(chapterId) { chaptersList.find { it.chapterId == chapterId } }
     if(chapter != null) {
-        val pages = splitText(chapter.text)
+        val file = File(chapter.path)
+        var text = ""
+        if(file.exists()) {
+            text = file.readText()
+        }
+        val pages = splitText(text)
         val state = rememberPagerState { pages.size }
         Box(
             modifier = modifier

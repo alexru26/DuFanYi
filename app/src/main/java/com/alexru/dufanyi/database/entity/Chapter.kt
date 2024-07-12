@@ -8,6 +8,6 @@ data class Chapter(
     @PrimaryKey(autoGenerate = true) val chapterId: Long = 0,
     val number: Long,
     val name: String,
-    val text: String,
+    val path: String,
     val seriesCreatorId: Long
 )
