@@ -5,8 +5,8 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import io.ktor.util.network.UnresolvedAddressException
 import kotlinx.serialization.SerializationException
-import util.Result
-import util.NetworkError
+import com.alexru.dufanyi.util.Result
+import com.alexru.dufanyi.util.NetworkError
 
 class NetClient(
     private val httpClient: HttpClient

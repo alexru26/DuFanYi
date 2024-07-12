@@ -1,4 +1,4 @@
-package util
+package com.alexru.dufanyi.util
 
 enum class NetworkError : Error {
     REQUEST_TIMEOUT,

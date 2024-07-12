@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.TextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -31,10 +30,7 @@ import com.alexru.dufanyi.database.dao.SeriesDao
 import com.alexru.dufanyi.database.entity.Chapter
 import com.alexru.dufanyi.database.entity.Series
 import kotlinx.coroutines.launch
-import com.alexru.dufanyi.networking.NetClient
 import com.alexru.dufanyi.ui.components.BrowseTopBar
-import util.onError
-import util.onSuccess
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -180,7 +176,7 @@ fun extractChaptersData(
     var name = ""
     var text: StringBuilder = StringBuilder()
 
-    val regex = Regex("""第(\d+)章\s*(?:(.+))?""")
+    val regex = Regex("""第(\d+)章\s*(.+)?""")
 
     for(i in lines.indices) {
         val line = lines[i]
@@ -208,7 +204,7 @@ fun extractChaptersData(
         }
         else {
             text.append(line)
-            text.append('\n')
+            text.append("\n")
 
             if(i == lines.size-1) {
                 list.add(Chapter(

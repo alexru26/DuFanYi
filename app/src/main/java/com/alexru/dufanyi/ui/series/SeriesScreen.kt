@@ -80,13 +80,13 @@ fun SeriesScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             if (series != null) {
-                titleCard(
+                TitleCard(
                     series
                 )
             }
             Spacer(Modifier.height(12.dp))
             if (series != null) {
-                chapterListing(
+                ChapterListing(
                     chapters = series.chapters,
                     onChapterClick = onChapterClick
                 )
@@ -96,7 +96,7 @@ fun SeriesScreen(
 }
 
 @Composable
-fun titleCard(
+fun TitleCard(
     series: SeriesWithChapters,
     modifier: Modifier = Modifier
 ) {
@@ -124,12 +124,12 @@ fun titleCard(
                 .clip(RoundedCornerShape(8.dp))
                 .background(Color.Gray)
         )
-        seriesTitleCardText(series)
+        SeriesTitleCardText(series)
     }
 }
 
 @Composable
-fun seriesTitleCardText(
+fun SeriesTitleCardText(
     series: SeriesWithChapters,
     modifier: Modifier = Modifier
 ) {
@@ -159,7 +159,7 @@ fun seriesTitleCardText(
 }
 
 @Composable
-fun chapterListing(
+fun ChapterListing(
     chapters: List<Chapter>,
     onChapterClick: (Long) -> Unit,
     modifier: Modifier = Modifier

@@ -17,7 +17,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.alexru.dufanyi.database.dao.SeriesDao
 import kotlinx.coroutines.launch
-import com.alexru.dufanyi.networking.NetClient
 import com.alexru.dufanyi.ui.browse.BrowseScreen
 import com.alexru.dufanyi.ui.library.LibraryScreen
 import com.alexru.dufanyi.ui.reader.ReaderScreen

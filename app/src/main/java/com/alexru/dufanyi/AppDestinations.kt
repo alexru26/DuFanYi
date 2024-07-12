@@ -9,7 +9,6 @@ import androidx.compose.material.icons.filled.TravelExplore
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import com.alexru.dufanyi.Series.seriesIdArgument
 
 interface AppDestination {
     val icon: ImageVector
@@ -20,19 +19,19 @@ interface AppDestination {
 object Library: AppDestination {
     override val icon = Icons.Default.Home
     override val route = "library"
-    override val routeWithArgs = "$route"
+    override val routeWithArgs = route
 }
 
 object Browse: AppDestination {
     override val icon = Icons.Default.TravelExplore
     override val route = "browse"
-    override val routeWithArgs = "$route"
+    override val routeWithArgs = route
 }
 
 object Settings: AppDestination {
     override val icon = Icons.Default.Settings
     override val route = "settings"
-    override val routeWithArgs = "$route"
+    override val routeWithArgs = route
 }
 
 object Series: AppDestination {
