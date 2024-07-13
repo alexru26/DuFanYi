@@ -158,7 +158,7 @@ fun ReaderTopBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         ),
-        title = { Text("Reader")  },
+        title = { Text("")  },
         navigationIcon = {
             IconButton(
                 onClick = { onNavigateBack() },

@@ -47,10 +47,12 @@ object Series: AppDestination {
 object Reader: AppDestination {
     override val icon = Icons.Default.Book
     override val route = "reader"
-    const val readerIdArgument = "id"
-    override val routeWithArgs = "${route}/{$readerIdArgument}"
+    const val seriesIdArgument = "seriesId"
+    const val chapterIdArgument = "chapterId"
+    override val routeWithArgs = "${route}/{$seriesIdArgument}/{$chapterIdArgument}"
     val arguments = listOf(
-        navArgument(readerIdArgument) { type = NavType.LongType }
+        navArgument(seriesIdArgument) { type = NavType.LongType },
+        navArgument(chapterIdArgument) { type = NavType.LongType }
     )
 }
 

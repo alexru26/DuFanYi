@@ -34,6 +34,7 @@ import com.alexru.dufanyi.ui.components.BrowseTopBar
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
+import kotlin.math.ceil
 
 @Composable
 fun BrowseScreen(
@@ -171,63 +172,125 @@ fun extractChaptersData(
 ): List<Chapter> {
     val cs: CharSequence = content
     val lines = cs.lines().slice(3..<cs.lines().size)
+    val text = lines.joinToString(separator = "\n")
 
-    val list = mutableListOf<Chapter>()
-
-    var first = true
-    var number: Long = 1
-    var name = ""
-    var text: StringBuilder = StringBuilder()
-
+    val regexSplitter = Regex("((?=第(\\d+)章\\s*(.+)?))")
     val regex = Regex("""第(\d+)章\s*(.+)?""")
+
+    val splitted = text.split(regexSplitter)
+    val chapterSplits = splitted.slice(1..<splitted.size)
 
     val directory = File(context.filesDir, seriesId.toString())
     if (!directory.exists()) {
         directory.mkdirs()
     }
 
-    for(i in lines.indices) {
-        val line = lines[i]
-        val matchResult = regex.matchEntire(line)
+    var index = 1
 
+    val list = mutableListOf<Chapter>()
+
+    for(chapter in chapterSplits) {
+        val matchResult = regex.matchEntire(chapter.lines()[0])
         if(matchResult != null) {
             val (chapterNumber, title) = matchResult.destructured
-
-            if(!first) {
-                val file = File(directory, chapterNumber)
-                file.writeText(text.toString())
-                list.add(Chapter(
-                    number = number,
-                    name = name,
-                    path = file.absolutePath,
-                    seriesCreatorId = seriesId
-                ))
+            val startIndex = index
+            splitText(chapter).forEach { page ->
+                val file = File(directory, index.toString())
+                println(file.absolutePath)
+                file.writeText(page)
+                index++
             }
-            first = false
-
-            number = chapterNumber.toLong()
-            name = line
-
-            text = StringBuilder()
-            text.append(line)
-            text.append('\n')
-        }
-        else {
-            text.append(line)
-            text.append("\n")
-
-            if(i == lines.size-1) {
-                val file = File(directory, number.toString())
-                file.writeText(text.toString())
-                list.add(Chapter(
-                    number = number,
-                    name = name,
-                    path = file.absolutePath,
-                    seriesCreatorId = seriesId
-                ))
-            }
+            val endIndex = index-1
+            index++
+            list.add(Chapter(
+                number = chapterNumber.toLong(),
+                name = chapter.lines()[0],
+                startPage = startIndex,
+                endPage = endIndex,
+                seriesCreatorId = seriesId
+            ))
         }
     }
 
+//    var first = true
+//    var number: Long = 1
+//    var name = ""
+//    var text: StringBuilder = StringBuilder()
+//
+//    val regex = Regex("""第(\d+)章\s*(.+)?""")
+//
+//    val directory = File(context.filesDir, seriesId.toString())
+//    if (!directory.exists()) {
+//        directory.mkdirs()
+//    }
+//
+//    for(i in lines.indices) {
+//        val line = lines[i]
+//        val matchResult = regex.matchEntire(line)
+//
+//        if(matchResult != null) {
+//            val (chapterNumber, title) = matchResult.destructured
+//
+//            if(!first) {
+//                val file = File(directory, chapterNumber)
+//                file.writeText(text.toString())
+//                list.add(Chapter(
+//                    number = number,
+//                    name = name,
+//                    path = file.absolutePath,
+//                    seriesCreatorId = seriesId
+//                ))
+//            }
+//            first = false
+//
+//            number = chapterNumber.toLong()
+//            name = line
+//
+//            text = StringBuilder()
+//            text.append(line)
+//            text.append('\n')
+//        }
+//        else {
+//            text.append(line)
+//            text.append("\n")
+//
+//            if(i == lines.size-1) {
+//                val file = File(directory, number.toString())
+//                file.writeText(text.toString())
+//                list.add(Chapter(
+//                    number = number,
+//                    name = name,
+//                    path = file.absolutePath,
+//                    seriesCreatorId = seriesId
+//                ))
+//            }
+//        }
+//    }
+
+    return list
+}
+
+fun splitText(text: String): List<String> {
+    val lines = text.split("\n")
+    val maxLines = 20
+    var page = StringBuilder()
+    var lineCounter = 0
+    val list = mutableListOf<String>()
+    for(i in lines.indices) {
+        val line = lines[i]
+
+        lineCounter += ceil(line.length/19.5).toInt()
+        if(lineCounter > maxLines) {
+            list.add(page.toString())
+            page = StringBuilder()
+            lineCounter = 0
+        }
+        page.append(line)
+        page.append("\n\n")
+        lineCounter += 2
+        if(i == lines.size-1) {
+            list.add(page.toString())
+        }
+    }
     return list
 }

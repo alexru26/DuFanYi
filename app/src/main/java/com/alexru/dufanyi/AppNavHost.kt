@@ -1,5 +1,6 @@
 package com.alexru.dufanyi
 
+import android.view.WindowInsetsController
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
@@ -12,6 +13,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -73,7 +77,11 @@ fun AppNavHost(
             SeriesScreen(
                 seriesList = seriesList,
                 seriesId = seriesId,
-                onChapterClick = { chapterId -> navController.navigateToReaderScreen(chapterId) },
+                onChapterClick = { chapterId ->
+                    if(seriesId != null) {
+                        navController.navigateToReaderScreen(seriesId, chapterId)
+                    }
+                 },
                 onNavigateBack = { navController.navigateUp() },
                 onDeleteSeries = {
                     val series = seriesList.find { it.series.seriesId == seriesId }
@@ -95,12 +103,16 @@ fun AppNavHost(
             popEnterTransition = { popEnterTransition() },
             popExitTransition = { popExitTransition() },
         ) { navBackStackEntry ->
-            val chapterId = navBackStackEntry.arguments?.getLong(Reader.readerIdArgument)
+            val seriesId = navBackStackEntry.arguments?.getLong(Reader.seriesIdArgument)
+            val chapterId = navBackStackEntry.arguments?.getLong(Reader.chapterIdArgument)
 
             ReaderScreen(
                 seriesList = seriesList,
+                seriesId = seriesId,
                 chapterId = chapterId,
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
             )
         }
     }
@@ -119,6 +131,6 @@ private fun NavHostController.navigateToSeriesScreen(seriesId: Long) {
     this.navigateSingleTopTo("${Series.route}/$seriesId")
 }
 
-private fun NavHostController.navigateToReaderScreen(chapterId: Long) {
-    this.navigateSingleTopTo("${Reader.route}/$chapterId")
+private fun NavHostController.navigateToReaderScreen(seriesId: Long, chapterId: Long) {
+    this.navigateSingleTopTo("${Reader.route}/$seriesId/$chapterId")
 }

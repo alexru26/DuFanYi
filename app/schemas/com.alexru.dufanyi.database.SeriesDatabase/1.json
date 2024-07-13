@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "1e03a9877adfe3cddf28c7244a264812",
+    "identityHash": "9e550718f099afec0c35639dc281bfec",
     "entities": [
       {
         "tableName": "Series",
@@ -42,7 +42,7 @@
       },
       {
         "tableName": "Chapter",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`chapterId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `number` INTEGER NOT NULL, `name` TEXT NOT NULL, `path` TEXT NOT NULL, `seriesCreatorId` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`chapterId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `number` INTEGER NOT NULL, `name` TEXT NOT NULL, `startPage` INTEGER NOT NULL, `endPage` INTEGER NOT NULL, `seriesCreatorId` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "chapterId",
@@ -63,9 +63,15 @@
             "notNull": true
           },
           {
-            "fieldPath": "path",
-            "columnName": "path",
-            "affinity": "TEXT",
+            "fieldPath": "startPage",
+            "columnName": "startPage",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endPage",
+            "columnName": "endPage",
+            "affinity": "INTEGER",
             "notNull": true
           },
           {
@@ -85,7 +91,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1e03a9877adfe3cddf28c7244a264812')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9e550718f099afec0c35639dc281bfec')"
     ]
   }
 }
