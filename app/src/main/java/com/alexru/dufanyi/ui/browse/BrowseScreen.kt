@@ -28,11 +28,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.alexru.dufanyi.database.dao.SeriesDao
 import com.alexru.dufanyi.database.entity.Chapter
+import com.alexru.dufanyi.database.entity.Page
 import com.alexru.dufanyi.database.entity.Series
 import kotlinx.coroutines.launch
 import com.alexru.dufanyi.ui.components.BrowseTopBar
 import java.io.BufferedReader
-import java.io.File
 import java.io.InputStreamReader
 import kotlin.math.ceil
 
@@ -93,12 +93,9 @@ fun SeriesUploadDialog(
                     content = content
                 )
                 seriesDao.upsertSeries(series)
-                val chapters = extractChaptersData(
-                    content = content,
-                    context = context,
-                    seriesId = seriesDao.getSeriesByName(series.name).seriesId
-                )
-                chapters.forEach { seriesDao.upsertChapter(it) }
+                val (chaptersList, pagesList) = extractChaptersData(content, seriesDao.getSeriesByName(series.name).seriesId)
+                chaptersList.forEach { seriesDao.upsertChapter(it) }
+                pagesList.forEach { seriesDao.upsertPage(it) }
                 isLoading = false
             }
         }
@@ -167,9 +164,8 @@ fun extractSeriesData(
 
 fun extractChaptersData(
     content: String,
-    context: Context,
     seriesId: Long
-): List<Chapter> {
+): Pair<List<Chapter>, List<Page>> {
     val cs: CharSequence = content
     val lines = cs.lines().slice(3..<cs.lines().size)
     val text = lines.joinToString(separator = "\n")
@@ -180,94 +176,41 @@ fun extractChaptersData(
     val splitted = text.split(regexSplitter)
     val chapterSplits = splitted.slice(1..<splitted.size)
 
-    val directory = File(context.filesDir, seriesId.toString())
-    if (!directory.exists()) {
-        directory.mkdirs()
-    }
-
     var index = 1
 
-    val list = mutableListOf<Chapter>()
+    val chaptersList = mutableListOf<Chapter>()
+    val pagesList = mutableListOf<Page>()
 
     for(chapter in chapterSplits) {
         val matchResult = regex.matchEntire(chapter.lines()[0])
-        if(matchResult != null) {
-            val (chapterNumber, title) = matchResult.destructured
+        if (matchResult != null) {
+            val chapterNumber = matchResult.destructured.toList()[0]
             val startIndex = index
             splitText(chapter).forEach { page ->
-                val file = File(directory, index.toString())
-                println(file.absolutePath)
-                file.writeText(page)
+                pagesList.add(
+                    Page(
+                        number = index.toLong(),
+                        text = page,
+                        seriesCreatorId = seriesId
+                    )
+                )
                 index++
             }
-            val endIndex = index-1
+            val endIndex = index - 1
             index++
-            list.add(Chapter(
-                number = chapterNumber.toLong(),
-                name = chapter.lines()[0],
-                startPage = startIndex,
-                endPage = endIndex,
-                seriesCreatorId = seriesId
-            ))
+            chaptersList.add(
+                Chapter(
+                    number = chapterNumber.toLong(),
+                    name = chapter.lines()[0],
+                    startPage = startIndex,
+                    endPage = endIndex,
+                    seriesCreatorId = seriesId
+                )
+            )
         }
     }
 
-//    var first = true
-//    var number: Long = 1
-//    var name = ""
-//    var text: StringBuilder = StringBuilder()
-//
-//    val regex = Regex("""第(\d+)章\s*(.+)?""")
-//
-//    val directory = File(context.filesDir, seriesId.toString())
-//    if (!directory.exists()) {
-//        directory.mkdirs()
-//    }
-//
-//    for(i in lines.indices) {
-//        val line = lines[i]
-//        val matchResult = regex.matchEntire(line)
-//
-//        if(matchResult != null) {
-//            val (chapterNumber, title) = matchResult.destructured
-//
-//            if(!first) {
-//                val file = File(directory, chapterNumber)
-//                file.writeText(text.toString())
-//                list.add(Chapter(
-//                    number = number,
-//                    name = name,
-//                    path = file.absolutePath,
-//                    seriesCreatorId = seriesId
-//                ))
-//            }
-//            first = false
-//
-//            number = chapterNumber.toLong()
-//            name = line
-//
-//            text = StringBuilder()
-//            text.append(line)
-//            text.append('\n')
-//        }
-//        else {
-//            text.append(line)
-//            text.append("\n")
-//
-//            if(i == lines.size-1) {
-//                val file = File(directory, number.toString())
-//                file.writeText(text.toString())
-//                list.add(Chapter(
-//                    number = number,
-//                    name = name,
-//                    path = file.absolutePath,
-//                    seriesCreatorId = seriesId
-//                ))
-//            }
-//        }
-//    }
-
-    return list
+    return Pair(chaptersList, pagesList)
 }
 
 fun splitText(text: String): List<String> {

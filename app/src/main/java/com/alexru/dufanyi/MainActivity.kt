@@ -3,8 +3,6 @@ package com.alexru.dufanyi
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import com.alexru.dufanyi.database.getSeriesDatabase
 import com.alexru.dufanyi.ui.theme.DuFanYiAppTheme
 
