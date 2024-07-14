@@ -25,6 +25,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextMeasurer
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import com.alexru.dufanyi.database.dao.SeriesDao
 import com.alexru.dufanyi.database.entity.Chapter
@@ -80,6 +83,7 @@ fun SeriesUploadDialog(
     }
     var isLoading by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    val textMeasurer = rememberTextMeasurer()
 
     LaunchedEffect(result.value) {
         result.value?.let { uri ->
@@ -93,7 +97,7 @@ fun SeriesUploadDialog(
                     content = content
                 )
                 seriesDao.upsertSeries(series)
-                val (chaptersList, pagesList) = extractChaptersData(content, seriesDao.getSeriesByName(series.name).seriesId)
+                val (chaptersList, pagesList) = extractChaptersData(content, seriesDao.getSeriesByName(series.name).seriesId, textMeasurer, context.resources.displayMetrics.widthPixels)
                 chaptersList.forEach { seriesDao.upsertChapter(it) }
                 pagesList.forEach { seriesDao.upsertPage(it) }
                 isLoading = false
@@ -164,7 +168,9 @@ fun extractSeriesData(
 
 fun extractChaptersData(
     content: String,
-    seriesId: Long
+    seriesId: Long,
+    textMeasurer: TextMeasurer,
+    width: Int
 ): Pair<List<Chapter>, List<Page>> {
     val cs: CharSequence = content
     val lines = cs.lines().slice(3..<cs.lines().size)
@@ -186,7 +192,7 @@ fun extractChaptersData(
         if (matchResult != null) {
             val chapterNumber = matchResult.destructured.toList()[0]
             val startIndex = index
-            splitText(chapter).forEach { page ->
+            splitText(chapter, textMeasurer, width).forEach { page ->
                 pagesList.add(
                     Page(
                         number = index.toLong(),
@@ -213,16 +219,26 @@ fun extractChaptersData(
     return Pair(chaptersList, pagesList)
 }
 
-fun splitText(text: String): List<String> {
+fun splitText(
+    text: String,
+    textMeasurer: TextMeasurer,
+    width: Int
+): List<String> {
     val lines = text.split("\n")
-    val maxLines = 20
+    val maxLines = 18
     var page = StringBuilder()
     var lineCounter = 0
     val list = mutableListOf<String>()
     for(i in lines.indices) {
         val line = lines[i]
 
-        lineCounter += ceil(line.length/19.5).toInt()
+        val count = textMeasurer.measure(
+            line,
+            constraints = Constraints(maxWidth = width-200),
+        ).lineCount
+
+        lineCounter += count
+
         if(lineCounter > maxLines) {
             list.add(page.toString())
             page = StringBuilder()
@@ -230,7 +246,7 @@ fun splitText(text: String): List<String> {
         }
         page.append(line)
         page.append("\n\n")
-        lineCounter += 2
+        lineCounter += 1
         if(i == lines.size-1) {
             list.add(page.toString())
         }

@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Icon
@@ -136,11 +138,14 @@ fun ReaderScreen(
                 Surface(
                     color = MaterialTheme.colorScheme.surface,
                     modifier = modifier
-                        .height(600.dp)
+                        .height(650.dp)
                         .fillMaxWidth()
                 ) {
                     val text = pagesList.find { it.number == page.toLong() }?.text ?: ""
-                    Column {
+                    Column(
+                        modifier = Modifier
+                            .verticalScroll(rememberScrollState())
+                    ) {
                         Text(
                             text = text,
                             modifier = Modifier
