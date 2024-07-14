@@ -9,5 +9,10 @@ data class SeriesWithChapters(
         parentColumn = "seriesId",
         entityColumn = "seriesCreatorId"
     )
-    val chapters: List<Chapter>
+    val chapters: List<Chapter>,
+    @Relation(
+        parentColumn = "seriesId",
+        entityColumn = "seriesCreatorId"
+    )
+    val pages: List<Page>
 )

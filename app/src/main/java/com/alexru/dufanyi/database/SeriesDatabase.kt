@@ -8,11 +8,13 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.alexru.dufanyi.database.dao.SeriesDao
 import com.alexru.dufanyi.database.entity.Series
 import com.alexru.dufanyi.database.entity.Chapter
+import com.alexru.dufanyi.database.entity.Page
 
 @Database(
     entities = [
         Series::class,
-        Chapter::class
+        Chapter::class,
+        Page::class
    ],
     version = 1
 )

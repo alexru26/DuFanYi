@@ -6,6 +6,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
 import com.alexru.dufanyi.database.entity.Chapter
+import com.alexru.dufanyi.database.entity.Page
 import com.alexru.dufanyi.database.entity.Series
 import com.alexru.dufanyi.database.entity.SeriesWithChapters
 import kotlinx.coroutines.flow.Flow
@@ -24,6 +25,12 @@ interface SeriesDao {
 
     @Delete
     suspend fun deleteChapter(chapter: Chapter)
+
+    @Upsert
+    suspend fun upsertPage(page: Page)
+
+    @Delete
+    suspend fun deletePage(page: Page)
 
     @Query("DELETE FROM series")
     suspend fun deleteAll()

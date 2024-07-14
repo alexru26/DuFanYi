@@ -10,14 +10,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -33,7 +31,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -41,8 +38,6 @@ import com.alexru.dufanyi.database.entity.Chapter
 import com.alexru.dufanyi.database.entity.SeriesWithChapters
 import com.alexru.dufanyi.ui.components.ReaderTopBar
 import com.alexru.dufanyi.ui.theme.DuFanYiAppTheme
-import java.io.File
-import kotlin.math.ceil
 
 @Composable
 fun ReaderScreen(
@@ -76,8 +71,8 @@ fun ReaderScreen(
     chapterId: Long? = 0,
     modifier: Modifier
 ) {
-    val context = LocalContext.current
     val series = remember(seriesList) { seriesList.find { it.series.seriesId == seriesId } }
+    val pagesList = series?.pages ?: listOf()
     val chaptersList = series?.chapters ?: listOf()
     val chaptersIndexList = chaptersList.map { it.chapterId }
     val chaptersStartEndList = chaptersList.map { (it.startPage..it.endPage) }
@@ -93,7 +88,7 @@ fun ReaderScreen(
     var inTransition by remember { mutableStateOf(false) }
 
     Surface(
-        color = Color.Black,
+        color = MaterialTheme.colorScheme.surface,
         modifier = Modifier
             .fillMaxSize()
     ) {
@@ -144,11 +139,7 @@ fun ReaderScreen(
                         .height(600.dp)
                         .fillMaxWidth()
                 ) {
-                    val file = File(context.filesDir.toString() + "/" + chapter.seriesCreatorId.toString() + "/" + page.toString())
-                    var text = ""
-                    if (file.exists()) {
-                        text = file.readText()
-                    }
+                    val text = pagesList.find { it.number == page.toLong() }?.text ?: ""
                     Column {
                         Text(
                             text = text,
@@ -307,39 +298,5 @@ fun AlertBox(
                     .align(Alignment.CenterVertically)
             )
         }
-    }
-}
-
-@Preview
-@Composable
-fun PreviewBackTransitionPage() {
-    DuFanYiAppTheme {
-        BackTransitionPage(
-            chaptersList = listOf(
-                Chapter(
-                    name = "HEK DKSOSKFAKJSK",
-                    number = 1,
-                    startPage = 1,
-                    endPage = 1,
-                    seriesCreatorId = 1
-                ),
-                Chapter(
-                    name = "XJWE OQNXMDJQLSIO",
-                    number = 1,
-                    startPage = 1,
-                    endPage = 1,
-                    seriesCreatorId = 1
-                )
-            ),
-            chapterIndex = 1
-        )
-    }
-}
-
-@Preview
-@Composable
-fun PreviewAlertBox() {
-    DuFanYiAppTheme {
-        AlertBox(string = "previous chapter")
     }
 }

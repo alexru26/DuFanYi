@@ -202,9 +202,10 @@ fun ChapterListing(
                 ) {
                     Column(
                         modifier = Modifier
+                            .align(Alignment.CenterVertically)
                             .padding(start = 16.dp)
                     ) {
-                        Text(chapter.name, Modifier.padding(bottom = 12.dp))
+                        Text(chapter.name)
 //                        Text(chapter.date)
                     }
                     IconButton(

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "9e550718f099afec0c35639dc281bfec",
+    "identityHash": "35fb60db707b9503a399e37f54cd8461",
     "entities": [
       {
         "tableName": "Series",
@@ -87,11 +87,47 @@
             "chapterId"
           ]
         }
+      },
+      {
+        "tableName": "Page",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pageId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `number` INTEGER NOT NULL, `text` TEXT NOT NULL, `seriesCreatorId` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pageId",
+            "columnName": "pageId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "number",
+            "columnName": "number",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "text",
+            "columnName": "text",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "seriesCreatorId",
+            "columnName": "seriesCreatorId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "pageId"
+          ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9e550718f099afec0c35639dc281bfec')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '35fb60db707b9503a399e37f54cd8461')"
     ]
   }
 }
