@@ -79,7 +79,6 @@ dependencies {
     implementation(libs.jetbrains.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx.v220)
     testImplementation(libs.junit)
     ksp(libs.room.compiler)
     androidTestImplementation(libs.androidx.junit)
