@@ -12,7 +12,6 @@ lifecycleRuntimeKtx = "2.8.2"
 activityCompose = "1.9.0"
 composeBom = "2024.04.01"
 ktor = "2.3.12"
-lifecycleRuntimeKtxVersion = "2.2.0"
 lifecycleViewmodelKtx = "2.8.3"
 roomKtx = "2.6.1"
 sqlite = "2.5.0-SNAPSHOT"
@@ -25,7 +24,6 @@ uiTextGoogleFonts = "1.6.8"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-androidx-lifecycle-runtime-ktx-v220 = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtxVersion" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
 google-gson = { module = "com.google.code.gson:gson", version.ref = "gsonVersion" }

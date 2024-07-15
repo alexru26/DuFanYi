@@ -10,8 +10,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.alexru.dufanyi.database.entity.SeriesWithChapters
 import com.alexru.dufanyi.ui.components.LibraryTopBar
 import com.alexru.dufanyi.ui.components.SeriesCard
@@ -19,8 +22,11 @@ import com.alexru.dufanyi.ui.components.SeriesCard
 @Composable
 fun LibraryScreen(
     seriesList: List<SeriesWithChapters>,
-    onSeriesClick: (Long) -> Unit
+    onSeriesClick: (Long) -> Unit,
+    libraryViewModel: LibraryViewModel = viewModel()
 ) {
+    val viewState by libraryViewModel.state.collectAsState()
+
     Scaffold(
         topBar = {
             LibraryTopBar()
