@@ -10,7 +10,7 @@ To actually use the app to read novels, first legally obtain a txt of the text. 
 - [x] Rework storage because it is horrendous right now
 - [x] Better split the text into pages
 - [ ] Keep track of which chapters have been read
-- [ ] Add ViewModels to keep track of data
+- [x] Add ViewModels to keep track of data (revisit later)
 - [ ] Improve Reader screen
 - [ ] Add translation features
 - [ ] Documentation... eventually
