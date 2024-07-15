@@ -38,26 +38,6 @@ fun SeriesCard(
             modifier = modifier
                 .padding(4.dp)
         ) {
-//            Image(
-//                painter = painterResource(Res.drawable.l14),
-//                contentDescription = null,
-//                contentScale = ContentScale.Crop,
-//                modifier = Modifier
-//                    .aspectRatio(0.75F)
-//                    .fillMaxHeight()
-//                    .clip(RoundedCornerShape(8.dp))
-//                    .drawWithCache {
-//                        val gradient = Brush.verticalGradient(
-//                            colors = listOf(Color.Transparent, Color.Black),
-//                            startY = size.height / 3,
-//                            endY = size.height
-//                        )
-//                        onDrawWithContent {
-//                            drawContent()
-//                            drawRect(gradient, blendMode = BlendMode.Multiply)
-//                        }
-//                    }
-//            )
             Box(
                 modifier = Modifier
                     .aspectRatio(0.75F)
@@ -86,5 +66,4 @@ fun SeriesCard(
             )
         }
     }
-
 }

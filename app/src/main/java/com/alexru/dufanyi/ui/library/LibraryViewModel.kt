@@ -2,10 +2,8 @@ package com.alexru.dufanyi.ui.library
 
 import androidx.lifecycle.ViewModel
 import com.alexru.dufanyi.database.entity.SeriesWithChapters
-import com.alexru.dufanyi.database.getSeriesDatabase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 class LibraryViewModel : ViewModel() {
     private val _state = MutableStateFlow(LibraryUiState())

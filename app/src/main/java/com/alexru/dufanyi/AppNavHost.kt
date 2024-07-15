@@ -1,26 +1,16 @@
 package com.alexru.dufanyi
 
-import android.view.WindowInsetsController
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.alexru.dufanyi.database.dao.SeriesDao
-import kotlinx.coroutines.launch
 import com.alexru.dufanyi.ui.browse.BrowseScreen
 import com.alexru.dufanyi.ui.components.enterTransition
 import com.alexru.dufanyi.ui.components.exitTransition
@@ -30,6 +20,7 @@ import com.alexru.dufanyi.ui.library.LibraryScreen
 import com.alexru.dufanyi.ui.reader.ReaderScreen
 import com.alexru.dufanyi.ui.series.SeriesScreen
 import com.alexru.dufanyi.ui.settings.SettingsScreen
+import kotlinx.coroutines.launch
 
 @Composable
 fun AppNavHost(

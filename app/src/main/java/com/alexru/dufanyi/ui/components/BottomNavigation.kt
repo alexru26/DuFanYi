@@ -1,6 +1,5 @@
 package com.alexru.dufanyi.ui.components
 
-import com.alexru.dufanyi.AppDestination
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -11,6 +10,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.alexru.dufanyi.AppDestination
 
 @Composable
 fun BottomNavigation(

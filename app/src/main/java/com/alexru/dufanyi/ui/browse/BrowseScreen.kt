@@ -33,11 +33,10 @@ import com.alexru.dufanyi.database.dao.SeriesDao
 import com.alexru.dufanyi.database.entity.Chapter
 import com.alexru.dufanyi.database.entity.Page
 import com.alexru.dufanyi.database.entity.Series
-import kotlinx.coroutines.launch
 import com.alexru.dufanyi.ui.components.BrowseTopBar
+import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import kotlin.math.ceil
 
 @Composable
 fun BrowseScreen(
