@@ -26,6 +26,12 @@ interface SeriesDao {
     @Delete
     suspend fun deleteChapter(chapter: Chapter)
 
+    @Query("UPDATE chapter SET currentPage = :page WHERE chapterId = :chapterId")
+    suspend fun updateChapterRead(chapterId: Long, page: Int)
+
+    @Query("UPDATE chapter SET read = 1 WHERE chapterId = :chapterId")
+    suspend fun updateChapterRead(chapterId: Long)
+
     @Upsert
     suspend fun upsertPage(page: Page)
 

@@ -205,8 +205,15 @@ fun ChapterListing(
                             .align(Alignment.CenterVertically)
                             .padding(start = 16.dp)
                     ) {
-                        Text(chapter.name)
-//                        Text(chapter.date)
+                        val opacity = if(!chapter.read) 1.0f else 0.5f
+                        Text(chapter.name, color = MaterialTheme.colorScheme.onSurface.copy(alpha = opacity))
+                        if(!chapter.read && chapter.currentPage != chapter.startPage) {
+                            Text(
+                                text = "Page: ${chapter.currentPage}",
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
+                        }
                     }
                     IconButton(
                         onClick = {},

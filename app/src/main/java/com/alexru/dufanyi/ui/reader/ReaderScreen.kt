@@ -29,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,10 +37,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.alexru.dufanyi.database.dao.SeriesDao
 import com.alexru.dufanyi.database.entity.Chapter
 import com.alexru.dufanyi.database.entity.SeriesWithChapters
 import com.alexru.dufanyi.ui.components.ReaderTopBar
 import com.alexru.dufanyi.ui.theme.DuFanYiAppTheme
+import kotlinx.coroutines.launch
 
 @Composable
 fun ReaderScreen(
@@ -47,6 +50,8 @@ fun ReaderScreen(
     seriesId: Long? = 0,
     chapterId: Long? = 0,
     onNavigateBack: () -> Unit,
+    onChapterRead: (Long, Int) -> Unit,
+    onChapterFinished: (Long) -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -59,6 +64,8 @@ fun ReaderScreen(
             seriesList = seriesList,
             seriesId = seriesId,
             chapterId = chapterId,
+            onChapterRead = onChapterRead,
+            onChapterFinished = onChapterFinished,
             modifier = Modifier
                 .padding(innerPadding)
         )
@@ -71,6 +78,8 @@ fun ReaderScreen(
     seriesList: List<SeriesWithChapters>,
     seriesId: Long? = 0,
     chapterId: Long? = 0,
+    onChapterRead: (Long, Int) -> Unit,
+    onChapterFinished: (Long) -> Unit,
     modifier: Modifier
 ) {
     val series = remember(seriesList) { seriesList.find { it.series.seriesId == seriesId } }
@@ -83,11 +92,9 @@ fun ReaderScreen(
     val chapter = remember(chapterIndex) { chaptersList[chapterIndex] }
 
     val pages = (0..chaptersList[chaptersList.lastIndex].endPage+1).toList()
-    val state = rememberPagerState(initialPage = chapter.startPage) { pages.size }
 
-    var currentPage by remember { mutableIntStateOf(1) }
-
-    var inTransition by remember { mutableStateOf(false) }
+    var currentPage by remember { mutableIntStateOf(if(chapter.read) chapter.startPage else chapter.currentPage) }
+    val state = rememberPagerState(initialPage = currentPage) { pages.size }
 
     Surface(
         color = MaterialTheme.colorScheme.surface,
@@ -104,12 +111,14 @@ fun ReaderScreen(
             // LOGIC
             val currentRange = chaptersStartEndList.find { it.contains(state.currentPage) }
             if(currentRange != null) {
-                inTransition = false
                 currentPage = state.currentPage
                 chapterIndex = chaptersStartEndList.indexOf(currentRange)
+                onChapterRead(chapter.chapterId, currentPage-chapter.startPage+1)
             }
             else {
-                inTransition = true
+                if(state.currentPage > currentPage) {
+                    onChapterFinished(chapter.chapterId)
+                }
             }
 
             // UI

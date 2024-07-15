@@ -112,6 +112,16 @@ fun AppNavHost(
                 chapterId = chapterId,
                 onNavigateBack = {
                     navController.popBackStack()
+                },
+                onChapterRead = { id, page ->
+                    scope.launch {
+                        seriesDao.updateChapterRead(id, page)
+                    }
+                },
+                onChapterFinished = { id ->
+                    scope.launch {
+                        seriesDao.updateChapterRead(id)
+                    }
                 }
             )
         }
