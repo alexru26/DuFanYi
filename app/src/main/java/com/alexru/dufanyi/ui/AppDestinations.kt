@@ -1,4 +1,4 @@
-package com.alexru.dufanyi
+package com.alexru.dufanyi.ui
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
@@ -49,7 +49,7 @@ object Reader: AppDestination {
     override val route = "reader"
     const val seriesIdArgument = "seriesId"
     const val chapterIdArgument = "chapterId"
-    override val routeWithArgs = "${route}/{$seriesIdArgument}/{$chapterIdArgument}"
+    override val routeWithArgs = "$route/{$seriesIdArgument}/{$chapterIdArgument}"
     val arguments = listOf(
         navArgument(seriesIdArgument) { type = NavType.LongType },
         navArgument(chapterIdArgument) { type = NavType.LongType }

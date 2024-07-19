@@ -1,16 +1,13 @@
-package com.alexru.dufanyi
+package com.alexru.dufanyi.ui
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.alexru.dufanyi.database.dao.SeriesDao
 import com.alexru.dufanyi.ui.browse.BrowseScreen
 import com.alexru.dufanyi.ui.components.enterTransition
 import com.alexru.dufanyi.ui.components.exitTransition
@@ -19,17 +16,14 @@ import com.alexru.dufanyi.ui.components.popExitTransition
 import com.alexru.dufanyi.ui.library.LibraryScreen
 import com.alexru.dufanyi.ui.reader.ReaderScreen
 import com.alexru.dufanyi.ui.series.SeriesScreen
+import com.alexru.dufanyi.ui.series.SeriesViewModel
 import com.alexru.dufanyi.ui.settings.SettingsScreen
-import kotlinx.coroutines.launch
 
 @Composable
 fun AppNavHost(
     navController: NavHostController,
-    seriesDao: SeriesDao,
     modifier: Modifier = Modifier
 ) {
-    val seriesList by seriesDao.getAllSeriesWithChapters().collectAsState(initial = emptyList())
-    val scope = rememberCoroutineScope()
     NavHost(
         navController = navController,
         startDestination = Library.route,
@@ -41,19 +35,14 @@ fun AppNavHost(
     ) {
         composable(route = Library.route) {
             LibraryScreen(
-                seriesList = seriesList,
                 onSeriesClick = { seriesId -> navController.navigateToSeriesScreen(seriesId) }
             )
         }
         composable(route = Browse.route) {
-            BrowseScreen(
-                seriesDao = seriesDao,
-            )
+            BrowseScreen()
         }
         composable(route = Settings.route) {
-            SettingsScreen(
-
-            )
+            SettingsScreen()
         }
         composable(
             route = Series.routeWithArgs,
@@ -64,9 +53,7 @@ fun AppNavHost(
             popExitTransition = { popExitTransition() },
         ) { navBackStackEntry ->
             val seriesId = navBackStackEntry.arguments?.getLong(Series.seriesIdArgument)
-
             SeriesScreen(
-                seriesList = seriesList,
                 seriesId = seriesId,
                 onChapterClick = { chapterId ->
                     if(seriesId != null) {
@@ -74,16 +61,6 @@ fun AppNavHost(
                     }
                  },
                 onNavigateBack = { navController.navigateUp() },
-                onDeleteSeries = {
-                    val series = seriesList.find { it.series.seriesId == seriesId }
-                    scope.launch {
-                        if (series != null) {
-                            seriesDao.deleteSeries(series.series)
-                            series.chapters.forEach { seriesDao.deleteChapter(it) }
-                        }
-                        navController.navigateSingleTopTo(Library.route)
-                    }
-                }
             )
         }
         composable(
@@ -98,21 +75,10 @@ fun AppNavHost(
             val chapterId = navBackStackEntry.arguments?.getLong(Reader.chapterIdArgument)
 
             ReaderScreen(
-                seriesList = seriesList,
                 seriesId = seriesId,
                 chapterId = chapterId,
                 onNavigateBack = {
                     navController.popBackStack()
-                },
-                onChapterRead = { id, page ->
-                    scope.launch {
-                        seriesDao.updateChapterRead(id, page)
-                    }
-                },
-                onChapterFinished = { id ->
-                    scope.launch {
-                        seriesDao.updateChapterRead(id)
-                    }
                 }
             )
         }

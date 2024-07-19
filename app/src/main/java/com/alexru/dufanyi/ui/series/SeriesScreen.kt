@@ -25,36 +25,42 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.alexru.dufanyi.database.entity.Chapter
-import com.alexru.dufanyi.database.entity.SeriesWithChapters
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.alexru.dufanyi.data.entity.ChapterEntity
+import com.alexru.dufanyi.data.entity.SeriesEntity
 import com.alexru.dufanyi.ui.components.SeriesTopBar
 
 @Composable
 fun SeriesScreen(
-    seriesList: List<SeriesWithChapters>,
     seriesId: Long? = 0,
     onChapterClick: (Long) -> Unit,
     onNavigateBack: () -> Unit,
-    onDeleteSeries: () -> Unit
+    seriesViewModel: SeriesViewModel = hiltViewModel()
 ) {
+    val state by seriesViewModel.state.collectAsStateWithLifecycle()
+    val onDeleteSeries = seriesViewModel::onDeleteSeries
     Scaffold(
         topBar = {
             SeriesTopBar(
                 onNavigateBack = onNavigateBack,
-                onDeleteSeries = onDeleteSeries
+                onDeleteSeries = {
+                    onNavigateBack()
+                    onDeleteSeries()
+                }
             )
         },
     ) { innerPadding ->
         SeriesScreen(
-            seriesList = seriesList,
-            seriesId = seriesId,
+            series = state.series,
+            chaptersList = state.chaptersList,
             onChapterClick = onChapterClick,
             modifier = Modifier
                 .padding(innerPadding)
@@ -64,8 +70,8 @@ fun SeriesScreen(
 
 @Composable
 fun SeriesScreen(
-    seriesList: List<SeriesWithChapters>,
-    seriesId: Long? = 0,
+    series: SeriesEntity?,
+    chaptersList: List<ChapterEntity>,
     onChapterClick: (Long) -> Unit,
     modifier: Modifier
 ) {
@@ -74,7 +80,6 @@ fun SeriesScreen(
         modifier = modifier
             .fillMaxSize()
     ) {
-        val series = remember(seriesId) { seriesList.find { it.series.seriesId == seriesId } }
         Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
@@ -87,7 +92,7 @@ fun SeriesScreen(
             Spacer(Modifier.height(12.dp))
             if (series != null) {
                 ChapterListing(
-                    chapters = series.chapters,
+                    chapters = chaptersList,
                     onChapterClick = onChapterClick
                 )
             }
@@ -97,7 +102,7 @@ fun SeriesScreen(
 
 @Composable
 fun TitleCard(
-    series: SeriesWithChapters,
+    series: SeriesEntity,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -130,7 +135,7 @@ fun TitleCard(
 
 @Composable
 fun SeriesTitleCardText(
-    series: SeriesWithChapters,
+    series: SeriesEntity,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -138,19 +143,19 @@ fun SeriesTitleCardText(
             .padding(horizontal = 16.dp)
     ) {
         Text(
-            text = series.series.name,
+            text = series.name,
             style = MaterialTheme.typography.titleLarge,
             modifier = modifier
                 .padding(bottom = 4.dp)
         )
         Text(
-            text = series.series.author,
+            text = series.author,
             style = MaterialTheme.typography.labelLarge,
             modifier = modifier
                 .padding(bottom = 4.dp)
         )
         Text(
-            text = series.series.status,
+            text = series.status,
             style = MaterialTheme.typography.labelLarge,
             modifier = modifier
                 .padding(bottom = 4.dp)
@@ -160,7 +165,7 @@ fun SeriesTitleCardText(
 
 @Composable
 fun ChapterListing(
-    chapters: List<Chapter>,
+    chapters: List<ChapterEntity>,
     onChapterClick: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {

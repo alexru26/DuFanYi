@@ -1,10 +1,10 @@
-package com.alexru.dufanyi.database.entity
+package com.alexru.dufanyi.data.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-data class Page(
+data class PageEntity(
     @PrimaryKey(autoGenerate = true) val pageId: Long = 0,
     val number: Long,
     val text: String,
