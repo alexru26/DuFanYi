@@ -1,4 +1,4 @@
-package com.alexru.dufanyi
+package com.alexru.dufanyi.ui
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -11,13 +11,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.alexru.dufanyi.database.dao.SeriesDao
+import com.alexru.dufanyi.data.dao.SeriesDao
 import com.alexru.dufanyi.ui.components.BottomNavigation
 
 @Composable
-fun ChineseSupportReaderApp(
-    seriesDao: SeriesDao,
-) {
+fun DuFanYiApp() {
     val navController = rememberNavController()
 
     val currentBackStack by navController.currentBackStackEntryAsState()
@@ -28,7 +26,7 @@ fun ChineseSupportReaderApp(
     var bottomBarState by rememberSaveable { mutableStateOf(true) }
 
     LaunchedEffect(true) {
-//        seriesDao.deleteAll()
+
     }
 
     bottomBarState = when(currentScreen) {
@@ -53,7 +51,6 @@ fun ChineseSupportReaderApp(
     ) { innerPadding ->
         AppNavHost(
             navController = navController,
-            seriesDao = seriesDao,
             modifier = Modifier.padding(innerPadding)
         )
     }

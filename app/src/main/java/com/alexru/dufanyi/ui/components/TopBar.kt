@@ -126,7 +126,7 @@ fun SeriesTopBar(
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "download"
+                    contentDescription = "delete"
                 )
             }
             IconButton(

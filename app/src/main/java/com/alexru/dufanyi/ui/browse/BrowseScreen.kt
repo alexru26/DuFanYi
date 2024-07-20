@@ -1,6 +1,5 @@
 package com.alexru.dufanyi.ui.browse
 
-import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -15,40 +14,33 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
-import com.alexru.dufanyi.database.dao.SeriesDao
-import com.alexru.dufanyi.database.entity.Chapter
-import com.alexru.dufanyi.database.entity.Page
-import com.alexru.dufanyi.database.entity.Series
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.alexru.dufanyi.ui.components.BrowseTopBar
-import kotlinx.coroutines.launch
-import java.io.BufferedReader
-import java.io.InputStreamReader
 
 @Composable
 fun BrowseScreen(
-    seriesDao: SeriesDao,
+    browseViewModel: BrowseViewModel = hiltViewModel<BrowseViewModel>()
 ) {
+    val state by browseViewModel.state.collectAsStateWithLifecycle()
+
     Scaffold(
         topBar = {
             BrowseTopBar()
         },
     ) { innerPadding ->
         BrowseScreen(
-            seriesDao = seriesDao,
+            isUploading = state.isUploading,
+            onUpload = browseViewModel::onUpload,
             modifier = Modifier
                 .padding(innerPadding)
         )
@@ -57,7 +49,8 @@ fun BrowseScreen(
 
 @Composable
 fun BrowseScreen(
-    seriesDao: SeriesDao,
+    isUploading: Boolean,
+    onUpload: (Uri, TextMeasurer) -> Unit,
     modifier: Modifier
 ) {
     Surface(
@@ -66,43 +59,24 @@ fun BrowseScreen(
             .fillMaxSize()
     ) {
         SeriesUploadDialog(
-            seriesDao = seriesDao,
+            isUploading = isUploading,
+            onUpload = onUpload
         )
     }
 }
 
 @Composable
 fun SeriesUploadDialog(
-    seriesDao: SeriesDao,
+    isUploading: Boolean,
+    onUpload: (Uri, TextMeasurer) -> Unit,
 ) {
-    val context = LocalContext.current
-    val result = remember { mutableStateOf<Uri?>(null) }
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
-        result.value = it
-    }
-    var isLoading by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
     val textMeasurer = rememberTextMeasurer()
-
-    LaunchedEffect(result.value) {
-        result.value?.let { uri ->
-            isLoading = true
-            scope.launch {
-                val content = readTextFromUri(
-                    context = context,
-                    uri = uri
-                )
-                val series = extractSeriesData(
-                    content = content
-                )
-                seriesDao.upsertSeries(series)
-                val (chaptersList, pagesList) = extractChaptersData(content, seriesDao.getSeriesByName(series.name).seriesId, textMeasurer, context.resources.displayMetrics.widthPixels)
-                chaptersList.forEach { seriesDao.upsertChapter(it) }
-                pagesList.forEach { seriesDao.upsertPage(it) }
-                isLoading = false
-            }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
+        if (it != null) {
+            onUpload(it, textMeasurer)
         }
     }
+
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -118,7 +92,7 @@ fun SeriesUploadDialog(
             },
             modifier = Modifier
         ) {
-            if(isLoading) {
+            if(isUploading) {
                 CircularProgressIndicator(
                     strokeWidth = 1.dp,
                     color = Color.White,
@@ -131,124 +105,4 @@ fun SeriesUploadDialog(
             }
         }
     }
-}
-
-fun readTextFromUri(context: Context, uri: Uri): String {
-    val contentResolver = context.contentResolver
-    val inputStream = contentResolver.openInputStream(uri)
-    val reader = BufferedReader(InputStreamReader(inputStream))
-    val stringBuilder = StringBuilder()
-    var line: String?
-
-    try {
-        while (reader.readLine().also { line = it } != null) {
-            stringBuilder.append(line)
-            stringBuilder.append('\n')
-        }
-    } finally {
-        reader.close()
-        inputStream?.close()
-    }
-
-    return stringBuilder.toString()
-}
-
-fun extractSeriesData(
-    content: String
-): Series {
-    val cs: CharSequence = content
-    val lines = cs.lines()
-    return Series(
-        name = lines[0],
-        author = lines[1],
-        status = lines[2]
-    )
-}
-
-fun extractChaptersData(
-    content: String,
-    seriesId: Long,
-    textMeasurer: TextMeasurer,
-    width: Int
-): Pair<List<Chapter>, List<Page>> {
-    val cs: CharSequence = content
-    val lines = cs.lines().slice(3..<cs.lines().size)
-    val text = lines.joinToString(separator = "\n")
-
-    val regexSplitter = Regex("((?=第(\\d+)章\\s*(.+)?))")
-    val regex = Regex("""第(\d+)章\s*(.+)?""")
-
-    val splitted = text.split(regexSplitter)
-    val chapterSplits = splitted.slice(1..<splitted.size)
-
-    var index = 1
-
-    val chaptersList = mutableListOf<Chapter>()
-    val pagesList = mutableListOf<Page>()
-
-    for(chapter in chapterSplits) {
-        val matchResult = regex.matchEntire(chapter.lines()[0])
-        if (matchResult != null) {
-            val chapterNumber = matchResult.destructured.toList()[0]
-            val startIndex = index
-            splitText(chapter, textMeasurer, width).forEach { page ->
-                pagesList.add(
-                    Page(
-                        number = index.toLong(),
-                        text = page,
-                        seriesCreatorId = seriesId
-                    )
-                )
-                index++
-            }
-            val endIndex = index - 1
-            index++
-            chaptersList.add(
-                Chapter(
-                    number = chapterNumber.toLong(),
-                    name = chapter.lines()[0],
-                    startPage = startIndex,
-                    endPage = endIndex,
-                    seriesCreatorId = seriesId
-                )
-            )
-        }
-    }
-
-    return Pair(chaptersList, pagesList)
-}
-
-fun splitText(
-    text: String,
-    textMeasurer: TextMeasurer,
-    width: Int
-): List<String> {
-    val lines = text.split("\n")
-    val maxLines = 18
-    var page = StringBuilder()
-    var lineCounter = 0
-    val list = mutableListOf<String>()
-    for(i in lines.indices) {
-        val line = lines[i]
-
-        val count = textMeasurer.measure(
-            line,
-            constraints = Constraints(maxWidth = width-200),
-        ).lineCount
-
-        lineCounter += count
-
-        if(lineCounter > maxLines) {
-            list.add(page.toString())
-            page = StringBuilder()
-            lineCounter = 0
-        }
-        page.append(line)
-        page.append("\n\n")
-        lineCounter += 1
-        if(i == lines.size-1) {
-            list.add(page.toString())
-        }
-    }
-    return list
 }

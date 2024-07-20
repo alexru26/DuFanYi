@@ -10,7 +10,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.alexru.dufanyi.AppDestination
+import com.alexru.dufanyi.ui.AppDestination
 
 @Composable
 fun BottomNavigation(

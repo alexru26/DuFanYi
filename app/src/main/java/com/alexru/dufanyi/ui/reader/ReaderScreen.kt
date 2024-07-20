@@ -34,19 +34,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.alexru.dufanyi.database.entity.Chapter
-import com.alexru.dufanyi.database.entity.SeriesWithChapters
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.alexru.dufanyi.data.entity.ChapterEntity
+import com.alexru.dufanyi.data.entity.PageEntity
 import com.alexru.dufanyi.ui.components.ReaderTopBar
 
 @Composable
 fun ReaderScreen(
-    seriesList: List<SeriesWithChapters>,
-    seriesId: Long? = 0,
-    chapterId: Long? = 0,
     onNavigateBack: () -> Unit,
-    onChapterRead: (Long, Int) -> Unit,
-    onChapterFinished: (Long) -> Unit,
+    readerViewModel: ReaderViewModel = hiltViewModel<ReaderViewModel>()
 ) {
+    val state = readerViewModel.state
+
     Scaffold(
         topBar = {
             ReaderTopBar(
@@ -55,30 +54,50 @@ fun ReaderScreen(
         }
     ) { innerPadding ->
         ReaderScreen(
-            seriesList = seriesList,
-            seriesId = seriesId,
-            chapterId = chapterId,
-            onChapterRead = onChapterRead,
-            onChapterFinished = onChapterFinished,
+            state = state,
+            onChapterRead = readerViewModel::onChapterRead,
+            onChapterFinished = readerViewModel::onChapterFinished,
             modifier = Modifier
                 .padding(innerPadding)
         )
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+
 @Composable
 fun ReaderScreen(
-    seriesList: List<SeriesWithChapters>,
-    seriesId: Long? = 0,
-    chapterId: Long? = 0,
+    state: ReaderUiState,
     onChapterRead: (Long, Int) -> Unit,
     onChapterFinished: (Long) -> Unit,
-    modifier: Modifier
+    modifier: Modifier = Modifier
 ) {
-    val series = remember(seriesList) { seriesList.find { it.series.seriesId == seriesId } }
-    val pagesList = series?.pages ?: listOf()
-    val chaptersList = series?.chapters ?: listOf()
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        modifier = modifier
+            .fillMaxSize()
+    ) {
+        if (state.chaptersList.isNotEmpty()) {
+            ReaderScreenContent(
+                chapterId = state.chapterId,
+                chaptersList = state.chaptersList,
+                pagesList = state.pagesList,
+                onChapterRead = onChapterRead,
+                onChapterFinished = onChapterFinished
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun ReaderScreenContent(
+    chapterId: Long,
+    chaptersList: List<ChapterEntity>,
+    pagesList: List<PageEntity>,
+    onChapterRead: (Long, Int) -> Unit,
+    onChapterFinished: (Long) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val chaptersIndexList = chaptersList.map { it.chapterId }
     val chaptersStartEndList = chaptersList.map { (it.startPage..it.endPage) }
 
@@ -90,94 +109,89 @@ fun ReaderScreen(
     var currentPage by remember { mutableIntStateOf(if(chapter.read) chapter.startPage else chapter.currentPage) }
     val state = rememberPagerState(initialPage = currentPage) { pages.size }
 
-    Surface(
-        color = MaterialTheme.colorScheme.surface,
+
+    HorizontalPager(
+        state = state,
+        pageSize = PageSize.Fill,
+        modifier = Modifier
+            .fillMaxSize()
+    ) { page ->
+
+        // LOGIC
+        val currentRange = chaptersStartEndList.find { it.contains(state.currentPage) }
+        if(currentRange != null) {
+            currentPage = state.currentPage
+            chapterIndex = chaptersStartEndList.indexOf(currentRange)
+            onChapterRead(chapter.chapterId, currentPage-chapter.startPage+1)
+        }
+        else {
+            if(state.currentPage > currentPage) {
+                onChapterFinished(chapter.chapterId)
+            }
+        }
+
+        // UI
+        val temp = chaptersStartEndList.find { it.contains(page) }
+        if(temp == null) {
+            Surface(
+                color = Color.Black,
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                if(page < currentPage) {
+                    BackTransitionPage(
+                        chaptersList = chaptersList,
+                        chapterIndex = chapterIndex
+                    )
+                }
+                else if(page > currentPage) {
+                    ForwardTransitionPage(
+                        chaptersList = chaptersList,
+                        chapterIndex = chapterIndex
+                    )
+                }
+            }
+        }
+        else {
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
+                modifier = modifier
+                    .height(650.dp)
+                    .fillMaxWidth()
+            ) {
+                val text = pagesList.find { it.number == page.toLong() }?.text ?: ""
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    Text(
+                        text = text,
+                        modifier = Modifier
+                            .padding(
+                                horizontal = 8.dp,
+                                vertical = 16.dp
+                            )
+                    )
+                }
+            }
+        }
+    }
+    Box(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        HorizontalPager(
-            state = state,
-            pageSize = PageSize.Fill,
+        Text(
+            text = "${currentPage-chapter.startPage + 1}/${chapter.endPage-chapter.startPage+1}",
             modifier = Modifier
-                .fillMaxSize()
-        ) { page ->
-
-            // LOGIC
-            val currentRange = chaptersStartEndList.find { it.contains(state.currentPage) }
-            if(currentRange != null) {
-                currentPage = state.currentPage
-                chapterIndex = chaptersStartEndList.indexOf(currentRange)
-                onChapterRead(chapter.chapterId, currentPage-chapter.startPage+1)
-            }
-            else {
-                if(state.currentPage > currentPage) {
-                    onChapterFinished(chapter.chapterId)
-                }
-            }
-
-            // UI
-            val temp = chaptersStartEndList.find { it.contains(page) }
-            if(temp == null) {
-                Surface(
-                    color = Color.Black,
-                    modifier = Modifier
-                        .fillMaxSize()
-                ) {
-                    if(page < currentPage) {
-                        BackTransitionPage(
-                            chaptersList = chaptersList,
-                            chapterIndex = chapterIndex
-                        )
-                    }
-                    else if(page > currentPage) {
-                        ForwardTransitionPage(
-                            chaptersList = chaptersList,
-                            chapterIndex = chapterIndex
-                        )
-                    }
-                }
-            }
-            else {
-                Surface(
-                    color = MaterialTheme.colorScheme.surface,
-                    modifier = modifier
-                        .height(650.dp)
-                        .fillMaxWidth()
-                ) {
-                    val text = pagesList.find { it.number == page.toLong() }?.text ?: ""
-                    Column(
-                        modifier = Modifier
-                            .verticalScroll(rememberScrollState())
-                    ) {
-                        Text(
-                            text = text,
-                            modifier = Modifier
-                                .padding(
-                                    horizontal = 8.dp,
-                                    vertical = 16.dp
-                                )
-                        )
-                    }
-                }
-            }
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
-            Text(
-                text = "${currentPage-chapter.startPage + 1}/${chapter.endPage-chapter.startPage+1}",
-                modifier = Modifier
-                    //.offset(y = -(8).dp)
-                    .align(Alignment.BottomCenter)
-            )
-        }
+                //.offset(y = -(8).dp)
+                .align(Alignment.BottomCenter)
+        )
     }
 }
 
 @Composable
 fun BackTransitionPage(
-    chaptersList: List<Chapter>,
+    chaptersList: List<ChapterEntity>,
     chapterIndex: Int
 ) {
     Column(
@@ -210,7 +224,7 @@ fun BackTransitionPage(
 
 @Composable
 fun ForwardTransitionPage(
-    chaptersList: List<Chapter>,
+    chaptersList: List<ChapterEntity>,
     chapterIndex: Int
 ) {
     Column(
