@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.alexru.dufanyi.data.dao.ChaptersDao
 import com.alexru.dufanyi.data.dao.PagesDao
 import com.alexru.dufanyi.data.dao.SeriesDao
@@ -32,22 +33,43 @@ class ReaderViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    var state by mutableStateOf(ReaderUiState())
-        private set
+    private val _state = MutableStateFlow(ReaderUiState())
+
+    private val seriesId: Long = savedStateHandle.get<Long>("seriesId")!!
+    private val chapterId: Long = savedStateHandle.get<Long>("chapterId")!!
+
+    private val chapterName = MutableStateFlow("")
+
+    private var showBars = MutableStateFlow(false)
+
+    val state: StateFlow<ReaderUiState>
+        get() = _state
 
     init {
         viewModelScope.launch {
-            val seriesId: Long = savedStateHandle.get<Long>("seriesId")!!
-            val chapterId: Long = savedStateHandle.get<Long>("chapterId")!!
-
             val series = seriesStore.getSeriesWithChapter(seriesId).first()
+            val chapter = chaptersStore.getChapter(chapterId).first()
+            chapterName.value = chapter.name
 
-            state = ReaderUiState(
-                seriesId = seriesId,
-                chapterId = chapterId,
-                chaptersList = series.chapters,
-                pagesList = series.pages
-            )
+            combine(
+                chapterName,
+                showBars
+            ) { chapterName,
+                showBars ->
+                ReaderUiState(
+                    series = series.series.name,
+                    chapterName = chapterName,
+                    seriesId = seriesId,
+                    chapterId = chapterId,
+                    chaptersList = series.chapters,
+                    pagesList = series.pages,
+                    showBars = showBars,
+                )
+            }.catch { throwable ->
+                throw throwable
+            }.collect {
+                _state.value = it
+            }
         }
     }
 
@@ -64,12 +86,24 @@ class ReaderViewModel @Inject constructor(
         }
     }
 
+    fun showBars(value: Boolean) {
+        showBars.value = value
+    }
+
+    fun updateChapterName(name: String) {
+        if(chapterName.value != name) {
+            chapterName.value = name
+        }
+    }
 }
 
 data class ReaderUiState(
+    val series: String = "",
+    val chapterName: String = "",
     val seriesId: Long = 0,
     val chapterId: Long = 0,
     val chaptersList: List<ChapterEntity> = emptyList(),
     val pagesList: List<PageEntity> = emptyList(),
+    val showBars: Boolean = false,
     val errorMessage: String? = null
 )

@@ -21,6 +21,8 @@ class ChaptersStore @Inject constructor(
 
     fun getChapters(seriesId: Long) = chaptersDao.getChapters(seriesId)
 
+    fun getChapter(chapterId: Long) = chaptersDao.getChapter(chapterId)
+
     suspend fun updateChapterRead(chapterId: Long, page: Int) {
         chaptersDao.updateChapterRead(chapterId, page)
     }

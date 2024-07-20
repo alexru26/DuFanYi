@@ -14,6 +14,9 @@ abstract class ChaptersDao : BaseDao<ChapterEntity> {
     @Query("SELECT * FROM chapterentity WHERE seriesCreatorId = :seriesId")
     abstract fun getChapters(seriesId: Long): Flow<List<ChapterEntity>>
 
+    @Query("SELECT * FROM chapterentity WHERE chapterId = :chapterId")
+    abstract fun getChapter(chapterId: Long): Flow<ChapterEntity>
+
     @Query("UPDATE chapterentity SET currentPage = :page WHERE chapterId = :chapterId")
     abstract suspend fun updateChapterRead(chapterId: Long, page: Int)
 

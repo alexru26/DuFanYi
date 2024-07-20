@@ -19,6 +19,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -27,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -35,8 +37,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.alexru.dufanyi.data.entity.ChapterEntity
 import com.alexru.dufanyi.data.entity.PageEntity
+import com.alexru.dufanyi.ui.components.ReaderBottomBar
 import com.alexru.dufanyi.ui.components.ReaderTopBar
 
 @Composable
@@ -44,12 +48,18 @@ fun ReaderScreen(
     onNavigateBack: () -> Unit,
     readerViewModel: ReaderViewModel = hiltViewModel<ReaderViewModel>()
 ) {
-    val state = readerViewModel.state
+    val state by readerViewModel.state.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
             ReaderTopBar(
+                state = state,
                 onNavigateBack = onNavigateBack
+            )
+        },
+        bottomBar = {
+            ReaderBottomBar(
+                state = state,
             )
         }
     ) { innerPadding ->
@@ -57,6 +67,8 @@ fun ReaderScreen(
             state = state,
             onChapterRead = readerViewModel::onChapterRead,
             onChapterFinished = readerViewModel::onChapterFinished,
+            showBars = readerViewModel::showBars,
+            updateChapterName = readerViewModel::updateChapterName,
             modifier = Modifier
                 .padding(innerPadding)
         )
@@ -69,11 +81,13 @@ fun ReaderScreen(
     state: ReaderUiState,
     onChapterRead: (Long, Int) -> Unit,
     onChapterFinished: (Long) -> Unit,
+    showBars: (Boolean) -> Unit,
+    updateChapterName: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surface,
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
     ) {
         if (state.chaptersList.isNotEmpty()) {
@@ -82,7 +96,9 @@ fun ReaderScreen(
                 chaptersList = state.chaptersList,
                 pagesList = state.pagesList,
                 onChapterRead = onChapterRead,
-                onChapterFinished = onChapterFinished
+                onChapterFinished = onChapterFinished,
+                updateChapterName = updateChapterName,
+                showBars = showBars
             )
         }
     }
@@ -96,8 +112,12 @@ fun ReaderScreenContent(
     pagesList: List<PageEntity>,
     onChapterRead: (Long, Int) -> Unit,
     onChapterFinished: (Long) -> Unit,
+    showBars: (Boolean) -> Unit,
+    updateChapterName: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var barsShown by remember { mutableStateOf(false) }
+
     val chaptersIndexList = chaptersList.map { it.chapterId }
     val chaptersStartEndList = chaptersList.map { (it.startPage..it.endPage) }
 
@@ -106,29 +126,35 @@ fun ReaderScreenContent(
 
     val pages = (0..chaptersList[chaptersList.lastIndex].endPage+1).toList()
 
-    var currentPage by remember { mutableIntStateOf(if(chapter.read) chapter.startPage else chapter.currentPage) }
+    var currentPage by remember(chapter) { mutableIntStateOf(if(chapter.read) chapter.startPage else chapter.currentPage) }
     val state = rememberPagerState(initialPage = currentPage) { pages.size }
-
 
     HorizontalPager(
         state = state,
         pageSize = PageSize.Fill,
         modifier = Modifier
+            .padding(top = 72.dp)
             .fillMaxSize()
     ) { page ->
 
         // LOGIC
         val currentRange = chaptersStartEndList.find { it.contains(state.currentPage) }
         if(currentRange != null) {
+            if(currentPage != state.currentPage) {
+                showBars(false)
+            }
             currentPage = state.currentPage
             chapterIndex = chaptersStartEndList.indexOf(currentRange)
-            onChapterRead(chapter.chapterId, currentPage-chapter.startPage+1)
+            updateChapterName(chapter.name)
+            onChapterRead(chapter.chapterId, currentPage)
         }
         else {
             if(state.currentPage > currentPage) {
                 onChapterFinished(chapter.chapterId)
             }
         }
+
+        //TODO: Add invisible buttons to detect touch to show bars
 
         // UI
         val temp = chaptersStartEndList.find { it.contains(page) }

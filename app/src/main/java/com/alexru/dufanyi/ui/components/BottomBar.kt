@@ -3,6 +3,7 @@ package com.alexru.dufanyi.ui.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -11,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.alexru.dufanyi.ui.AppDestination
+import com.alexru.dufanyi.ui.reader.ReaderUiState
 
 @Composable
 fun BottomNavigation(
@@ -64,4 +66,25 @@ fun BottomNavigationBar(
             )
         }
     }
+}
+
+@Composable
+fun ReaderBottomBar(
+    state: ReaderUiState,
+    modifier: Modifier = Modifier
+) {
+    AnimatedVisibility(
+        visible = state.showBars,
+        enter = EnterTransition.None,
+        exit = ExitTransition.None,
+        content = {
+            BottomAppBar(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                modifier = modifier
+            ) {
+
+            }
+        }
+    )
+
 }

@@ -228,7 +228,7 @@ fun ChapterListing(
                         Text(chapter.name, color = MaterialTheme.colorScheme.onSurface.copy(alpha = opacity))
                         if(!chapter.read && chapter.currentPage != chapter.startPage) {
                             Text(
-                                text = "Page: ${chapter.currentPage}",
+                                text = "Page: ${chapter.currentPage-chapter.startPage+1}",
                                 style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier.padding(top = 4.dp)
                             )
