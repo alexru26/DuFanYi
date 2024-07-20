@@ -2,13 +2,9 @@ package com.alexru.dufanyi.ui.browse
 
 import android.net.Uri
 import androidx.compose.ui.text.TextMeasurer
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
-import com.alexru.dufanyi.data.dao.ChaptersDao
-import com.alexru.dufanyi.data.dao.PagesDao
-import com.alexru.dufanyi.data.dao.SeriesDao
+import com.alexru.dufanyi.data.repository.SeriesRepository
 import com.alexru.dufanyi.util.ResourceManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,9 +16,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class BrowseViewModel @Inject constructor(
-    private val seriesDao: SeriesDao,
-    private val chaptersDao: ChaptersDao,
-    private val pagesDao: PagesDao,
+    private val seriesRepository: SeriesRepository,
     private val resourceManager: ResourceManager,
 ) : ViewModel() {
 
@@ -55,11 +49,8 @@ class BrowseViewModel @Inject constructor(
         viewModelScope.launch {
             val content = resourceManager.readTextFromUri(uri = uri)
             val series = resourceManager.extractSeriesData(content = content)
-            seriesDao.insert(series)
-            val seriesId = seriesDao.getSeriesByName(series.name).seriesId
-            val (chaptersList, pagesList) = resourceManager.extractChaptersData(content, seriesId, textMeasurer)
-            chaptersDao.insertAll(chaptersList)
-            pagesDao.insertAll(pagesList)
+            val (chaptersList, pagesList) = resourceManager.extractChaptersData(content, textMeasurer)
+            seriesRepository.updateSeries(series, chaptersList, pagesList)
             isUploading.value = false
         }
     }

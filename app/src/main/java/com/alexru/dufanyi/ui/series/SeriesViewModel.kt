@@ -1,5 +1,8 @@
 package com.alexru.dufanyi.ui.series
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,7 +11,7 @@ import com.alexru.dufanyi.data.dao.PagesDao
 import com.alexru.dufanyi.data.dao.SeriesDao
 import com.alexru.dufanyi.data.entity.ChapterEntity
 import com.alexru.dufanyi.data.entity.SeriesEntity
-import com.alexru.dufanyi.ui.browse.BrowseUiState
+import com.alexru.dufanyi.data.store.SeriesStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,15 +19,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class SeriesViewModel @Inject constructor(
-    private val seriesDao: SeriesDao,
-    private val chaptersDao: ChaptersDao,
-    private val pagesDao: PagesDao,
+    seriesStore: SeriesStore,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -32,9 +34,7 @@ class SeriesViewModel @Inject constructor(
 
     private val seriesId = savedStateHandle.get<Long>("id")!!
 
-    private val series = seriesDao.getSeries(seriesId)
-
-    private val chaptersList = chaptersDao.getChapters(seriesId)
+    private val series = seriesStore.getSeriesWithChapter(seriesId)
 
     val state: StateFlow<SeriesUiState>
         get() = _state
@@ -42,14 +42,13 @@ class SeriesViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             combine(
-                series,
-                chaptersList
-            ) { series,
-                chaptersList ->
+                series
+            ) { series ->
                 SeriesUiState(
-                    series = series,
-                    chaptersList = chaptersList,
-                    errorMessage = null
+                    name = series[0].series.name,
+                    author = series[0].series.author,
+                    status = series[0].series.status,
+                    chaptersList = series[0].chapters
                 )
             }.catch { throwable ->
                 throw throwable
@@ -70,7 +69,8 @@ class SeriesViewModel @Inject constructor(
 }
 
 data class SeriesUiState(
-    val series: SeriesEntity? = null,
+    val name: String = "",
+    val author: String = "",
+    val status: String = "",
     val chaptersList: List<ChapterEntity> = emptyList(),
-    val errorMessage: String? = null
 )

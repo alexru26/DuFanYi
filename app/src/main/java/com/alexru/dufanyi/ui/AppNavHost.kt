@@ -5,6 +5,7 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -47,14 +48,9 @@ fun AppNavHost(
         composable(
             route = Series.routeWithArgs,
             arguments = Series.arguments,
-            enterTransition = { enterTransition() },
-            exitTransition = { exitTransition() },
-            popEnterTransition = { popEnterTransition() },
-            popExitTransition = { popExitTransition() },
         ) { navBackStackEntry ->
             val seriesId = navBackStackEntry.arguments?.getLong(Series.seriesIdArgument)
             SeriesScreen(
-                seriesId = seriesId,
                 onChapterClick = { chapterId ->
                     if(seriesId != null) {
                         navController.navigateToReaderScreen(seriesId, chapterId)
@@ -75,10 +71,8 @@ fun AppNavHost(
             val chapterId = navBackStackEntry.arguments?.getLong(Reader.chapterIdArgument)
 
             ReaderScreen(
-                seriesId = seriesId,
-                chapterId = chapterId,
                 onNavigateBack = {
-                    navController.popBackStack()
+                    navController.navigateUp()
                 }
             )
         }

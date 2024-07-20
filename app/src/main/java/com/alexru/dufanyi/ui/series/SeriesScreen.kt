@@ -13,11 +13,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DownloadForOffline
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,12 +37,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.alexru.dufanyi.data.entity.ChapterEntity
-import com.alexru.dufanyi.data.entity.SeriesEntity
 import com.alexru.dufanyi.ui.components.SeriesTopBar
 
 @Composable
 fun SeriesScreen(
-    seriesId: Long? = 0,
     onChapterClick: (Long) -> Unit,
     onNavigateBack: () -> Unit,
     seriesViewModel: SeriesViewModel = hiltViewModel()
@@ -59,8 +59,7 @@ fun SeriesScreen(
         },
     ) { innerPadding ->
         SeriesScreen(
-            series = state.series,
-            chaptersList = state.chaptersList,
+            state = state,
             onChapterClick = onChapterClick,
             modifier = Modifier
                 .padding(innerPadding)
@@ -70,8 +69,7 @@ fun SeriesScreen(
 
 @Composable
 fun SeriesScreen(
-    series: SeriesEntity?,
-    chaptersList: List<ChapterEntity>,
+    state: SeriesUiState,
     onChapterClick: (Long) -> Unit,
     modifier: Modifier
 ) {
@@ -80,29 +78,39 @@ fun SeriesScreen(
         modifier = modifier
             .fillMaxSize()
     ) {
-        Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-        ) {
-            if (series != null) {
-                TitleCard(
-                    series
-                )
-            }
-            Spacer(Modifier.height(12.dp))
-            if (series != null) {
-                ChapterListing(
-                    chapters = chaptersList,
-                    onChapterClick = onChapterClick
-                )
-            }
+        if(state.name.isNotEmpty()) {
+            SeriesScreenContent(
+                state = state,
+                onChapterClick = onChapterClick
+            )
         }
     }
 }
 
 @Composable
+fun SeriesScreenContent(
+    state: SeriesUiState,
+    onChapterClick: (Long) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .verticalScroll(rememberScrollState())
+    ) {
+        TitleCard(
+            state = state
+        )
+        Spacer(Modifier.height(12.dp))
+        ChapterListing(
+            chapters = state.chaptersList,
+            onChapterClick = onChapterClick
+        )
+    }
+}
+
+@Composable
 fun TitleCard(
-    series: SeriesEntity,
+    state: SeriesUiState,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -129,13 +137,19 @@ fun TitleCard(
                 .clip(RoundedCornerShape(8.dp))
                 .background(Color.Gray)
         )
-        SeriesTitleCardText(series)
+        SeriesTitleCardText(
+            name = state.name,
+            author = state.author,
+            status = state.status
+        )
     }
 }
 
 @Composable
 fun SeriesTitleCardText(
-    series: SeriesEntity,
+    name: String,
+    author: String,
+    status: String,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -143,19 +157,19 @@ fun SeriesTitleCardText(
             .padding(horizontal = 16.dp)
     ) {
         Text(
-            text = series.name,
+            text = name,
             style = MaterialTheme.typography.titleLarge,
             modifier = modifier
                 .padding(bottom = 4.dp)
         )
         Text(
-            text = series.author,
+            text = author,
             style = MaterialTheme.typography.labelLarge,
             modifier = modifier
                 .padding(bottom = 4.dp)
         )
         Text(
-            text = series.status,
+            text = status,
             style = MaterialTheme.typography.labelLarge,
             modifier = modifier
                 .padding(bottom = 4.dp)

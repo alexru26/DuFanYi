@@ -49,7 +49,6 @@ class ResourceManager @Inject constructor(
 
     fun extractChaptersData(
         content: String,
-        seriesId: Long,
         textMeasurer: TextMeasurer
     ): Pair<List<ChapterEntity>, List<PageEntity>> {
         val cs: CharSequence = content
@@ -77,7 +76,7 @@ class ResourceManager @Inject constructor(
                         PageEntity(
                             number = index.toLong(),
                             text = page,
-                            seriesCreatorId = seriesId
+                            seriesCreatorId = -1
                         )
                     )
                     index++
@@ -90,7 +89,7 @@ class ResourceManager @Inject constructor(
                         name = chapter.lines()[0],
                         startPage = startIndex,
                         endPage = endIndex,
-                        seriesCreatorId = seriesId
+                        seriesCreatorId = -1
                     )
                 )
             }

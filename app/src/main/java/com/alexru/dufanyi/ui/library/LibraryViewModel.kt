@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.alexru.dufanyi.data.dao.SeriesDao
 import com.alexru.dufanyi.data.entity.SeriesEntity
 import com.alexru.dufanyi.data.entity.SeriesWithChapters
+import com.alexru.dufanyi.data.store.SeriesStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,12 +16,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LibraryViewModel @Inject constructor(
-    seriesDao: SeriesDao
+    seriesStore: SeriesStore
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(LibraryUiState())
 
-    private val seriesList = seriesDao.getAllSeries()
+    private val seriesList = seriesStore.getAllSeries()
 
     val state: StateFlow<LibraryUiState>
         get() = _state

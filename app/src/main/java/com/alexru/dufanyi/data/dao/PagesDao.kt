@@ -14,6 +14,9 @@ abstract class PagesDao : BaseDao<PageEntity> {
     @Query("SELECT * FROM pageentity WHERE seriesCreatorId = :seriesId")
     abstract fun getPages(seriesId: Long): Flow<List<PageEntity>>
 
+    @Query("UPDATE pageentity SET seriesCreatorId = :seriesId WHERE pageId = :pageId")
+    abstract suspend fun updatePageSeriesId(pageId: Long, seriesId: Long)
+
     @Query("DELETE FROM pageentity WHERE seriesCreatorId = :seriesId")
     abstract suspend fun deletePages(seriesId: Long)
 
