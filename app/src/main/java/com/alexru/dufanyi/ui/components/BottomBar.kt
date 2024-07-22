@@ -5,8 +5,11 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -82,10 +85,18 @@ fun ReaderBottomBar(
         content = {
             BottomAppBar(
                 containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                actions = {
+                    IconButton(
+                        onClick = { /*TODO*/ }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Translate,
+                            contentDescription = "translate"
+                        )
+                    }
+                },
                 modifier = modifier
-            ) {
-
-            }
+            )
         }
     )
 
