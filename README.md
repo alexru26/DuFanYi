@@ -9,7 +9,6 @@ To actually use the app to read novels, first legally obtain a txt of the text. 
 ## Goals
 - Add delete feature
 - Pagination
-- Improve Reader screen
 - Add translation features
 - Documentation... eventually
 
