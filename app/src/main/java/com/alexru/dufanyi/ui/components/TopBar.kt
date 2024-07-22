@@ -3,6 +3,8 @@ package com.alexru.dufanyi.ui.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -163,8 +165,8 @@ fun ReaderTopBar(
 ) {
     AnimatedVisibility(
         visible = state.showBars,
-        enter = EnterTransition.None,
-        exit = ExitTransition.None,
+        enter = slideInVertically(initialOffsetY = { -it }),
+        exit = slideOutVertically(targetOffsetY = { -it }),
         content = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(

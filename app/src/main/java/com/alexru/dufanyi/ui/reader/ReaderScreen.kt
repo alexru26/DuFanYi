@@ -2,6 +2,7 @@ package com.alexru.dufanyi.ui.reader
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -88,7 +90,6 @@ fun ReaderScreen(
     Surface(
         color = MaterialTheme.colorScheme.surface,
         modifier = Modifier
-            .fillMaxSize()
     ) {
         if (state.chaptersList.isNotEmpty()) {
             ReaderScreenContent(
@@ -133,28 +134,51 @@ fun ReaderScreenContent(
         state = state,
         pageSize = PageSize.Fill,
         modifier = Modifier
-            .padding(top = 72.dp)
             .fillMaxSize()
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures { offset ->
+                    val height = size.height
+                    val width = size.width
+                    when {
+                        offset.y > 2*height/3 -> {
+                            barsShown = !barsShown
+                            showBars(barsShown)
+                        }
+                        offset.y < height/3 -> {
+                            barsShown = !barsShown
+                            showBars(barsShown)
+                        }
+                        offset.x > width/3 && offset.x < 2*width/3 -> {
+                            barsShown = !barsShown
+                            showBars(barsShown)
+                        }
+                    }
+                }
+            }
     ) { page ->
 
         // LOGIC
         val currentRange = chaptersStartEndList.find { it.contains(state.currentPage) }
+        // in text page
         if(currentRange != null) {
             if(currentPage != state.currentPage) {
                 showBars(false)
             }
+            if(currentPage == chapter.endPage) {
+                onChapterFinished(chapter.chapterId)
+            }
             currentPage = state.currentPage
             chapterIndex = chaptersStartEndList.indexOf(currentRange)
             updateChapterName(chapter.name)
-            onChapterRead(chapter.chapterId, currentPage)
-        }
-        else {
-            if(state.currentPage > currentPage) {
-                onChapterFinished(chapter.chapterId)
+            if(currentPage >= chapter.startPage) {
+                onChapterRead(chapter.chapterId, currentPage)
             }
         }
-
-        //TODO: Add invisible buttons to detect touch to show bars
+        // in transition page
+        else {
+            showBars(false)
+        }
 
         // UI
         val temp = chaptersStartEndList.find { it.contains(page) }
@@ -182,6 +206,7 @@ fun ReaderScreenContent(
             Surface(
                 color = MaterialTheme.colorScheme.surface,
                 modifier = modifier
+                    .padding(top = 60.dp)
                     .height(650.dp)
                     .fillMaxWidth()
             ) {
